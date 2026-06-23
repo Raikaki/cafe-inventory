@@ -67,11 +67,11 @@ public class AttendanceService {
         }
 
         String name = req.employeeName().trim();
+        // Allow multiple scans per day. The first scan is the check-in (VAO);
+        // any later scan is a check-out (RA). The report takes MIN time as giờ vào
+        // and MAX time as giờ ra.
         List<AttendanceLog> existing =
                 logRepository.findByQrDateAndEmployeeNameIgnoreCaseOrderByScanTimeAsc(today, name);
-        if (existing.size() >= 2) {
-            throw new BusinessException("Hôm nay '" + name + "' đã chấm đủ giờ VÀO và giờ RA");
-        }
         String checkType = existing.isEmpty() ? "VAO" : "RA";
 
         AttendanceLog logEntry = new AttendanceLog();

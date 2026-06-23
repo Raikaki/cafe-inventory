@@ -48,23 +48,26 @@ export default function AttendanceAdmin() {
 
   const checkinUrl = qr ? `${window.location.origin}${qr.checkinPath}` : ''
 
-  // Group logs per employee -> giờ vào / giờ ra / số giờ làm
+  // Group logs per employee -> giờ vào = lần quét sớm nhất (min), giờ ra = muộn nhất (max)
   const summary = Object.values(logs.reduce((acc, l) => {
     const k = l.employeeName.toLowerCase()
-    if (!acc[k]) acc[k] = { key: k, employeeName: l.employeeName, vao: null, ra: null }
-    if (l.checkType === 'RA') {
-      if (!acc[k].ra || dayjs(l.scanTime).isAfter(acc[k].ra)) acc[k].ra = l.scanTime
-    } else {
-      if (!acc[k].vao || dayjs(l.scanTime).isBefore(acc[k].vao)) acc[k].vao = l.scanTime
-    }
+    if (!acc[k]) acc[k] = { key: k, employeeName: l.employeeName, min: l.scanTime, max: l.scanTime, count: 0 }
+    if (dayjs(l.scanTime).isBefore(acc[k].min)) acc[k].min = l.scanTime
+    if (dayjs(l.scanTime).isAfter(acc[k].max)) acc[k].max = l.scanTime
+    acc[k].count++
     return acc
   }, {})).map((r) => ({
-    ...r,
-    hours: (r.vao && r.ra) ? (dayjs(r.ra).diff(dayjs(r.vao), 'minute') / 60).toFixed(2) : null,
+    key: r.key,
+    employeeName: r.employeeName,
+    scans: r.count,
+    vao: r.min,
+    ra: r.count >= 2 ? r.max : null,
+    hours: r.count >= 2 ? (dayjs(r.max).diff(dayjs(r.min), 'minute') / 60).toFixed(2) : null,
   }))
 
   const summaryColumns = [
     { title: 'Nhân viên', dataIndex: 'employeeName' },
+    { title: 'Số lần quét', dataIndex: 'scans', width: 100, align: 'center' },
     { title: 'Giờ vào', dataIndex: 'vao', width: 110, render: (v) => v ? dayjs(v).format('HH:mm:ss') : '—' },
     { title: 'Giờ ra', dataIndex: 'ra', width: 110, render: (v) => v ? dayjs(v).format('HH:mm:ss') : <Tag color="orange">Chưa ra</Tag> },
     { title: 'Số giờ làm', dataIndex: 'hours', width: 110, align: 'right',
