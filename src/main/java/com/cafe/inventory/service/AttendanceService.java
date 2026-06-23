@@ -45,10 +45,19 @@ public class AttendanceService {
             throw new BusinessException("Mã QR không hợp lệ hoặc đã hết hạn (không phải mã của hôm nay)");
         }
 
+        String name = req.employeeName().trim();
+        List<AttendanceLog> existing =
+                logRepository.findByQrDateAndEmployeeNameIgnoreCaseOrderByScanTimeAsc(today, name);
+        if (existing.size() >= 2) {
+            throw new BusinessException("Hôm nay '" + name + "' đã chấm đủ giờ VÀO và giờ RA");
+        }
+        String checkType = existing.isEmpty() ? "VAO" : "RA";
+
         AttendanceLog logEntry = new AttendanceLog();
         logEntry.setQrDate(today);
         logEntry.setToken(req.token());
-        logEntry.setEmployeeName(req.employeeName().trim());
+        logEntry.setEmployeeName(name);
+        logEntry.setCheckType(checkType);
         logEntry.setIpAddress(ip);
         logEntry.setLatitude(req.latitude());
         logEntry.setLongitude(req.longitude());
@@ -56,8 +65,8 @@ public class AttendanceService {
         logEntry.setScanTime(LocalDateTime.now());
         logRepository.save(logEntry);
 
-        log.info("Attendance check-in: {} from IP {} at {}", logEntry.getEmployeeName(), ip, logEntry.getScanTime());
-        return new CheckinResponse(logEntry.getEmployeeName(), logEntry.getScanTime().toString(),
+        log.info("Attendance {} : {} from IP {} at {}", checkType, name, ip, logEntry.getScanTime());
+        return new CheckinResponse(name, checkType, logEntry.getScanTime().toString(),
                 ip, logEntry.getLatitude(), logEntry.getLongitude());
     }
 

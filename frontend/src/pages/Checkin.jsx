@@ -50,10 +50,11 @@ export default function Checkin() {
         </div>
 
         {done ? (
-          <Result status="success" title="Đã chấm công thành công!"
+          <Result status="success"
+            title={`Đã chấm công ${done.checkType === 'RA' ? 'GIỜ RA' : 'GIỜ VÀO'} thành công!`}
             subTitle={
               <Space direction="vertical" size={4} style={{ textAlign: 'left' }}>
-                <span><b>{done.employeeName}</b></span>
+                <span><b>{done.employeeName}</b> — {done.checkType === 'RA' ? 'Giờ ra' : 'Giờ vào'}</span>
                 <span><ClockCircleOutlined /> {dayjs(done.scanTime).format('DD/MM/YYYY HH:mm:ss')}</span>
                 <span>IP: {done.ipAddress}</span>
                 {done.latitude != null

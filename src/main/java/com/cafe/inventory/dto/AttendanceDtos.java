@@ -18,6 +18,7 @@ public class AttendanceDtos {
 
     public record CheckinResponse(
             String employeeName,
+            String checkType,        // VAO or RA
             String scanTime,
             String ipAddress,
             BigDecimal latitude,

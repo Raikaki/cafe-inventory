@@ -29,6 +29,9 @@ public class AttendanceLog {
     @Column(name = "employee_name", nullable = false)
     private String employeeName;
 
+    @Column(name = "check_type", nullable = false, length = 10)
+    private String checkType = "VAO"; // VAO = check-in, RA = check-out
+
     @Column(name = "ip_address", length = 64)
     private String ipAddress;
 

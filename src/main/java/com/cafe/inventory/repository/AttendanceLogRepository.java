@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface AttendanceLogRepository extends JpaRepository<AttendanceLog, Long> {
     List<AttendanceLog> findByQrDateOrderByScanTimeDesc(LocalDate qrDate);
+    List<AttendanceLog> findByQrDateAndEmployeeNameIgnoreCaseOrderByScanTimeAsc(LocalDate qrDate, String employeeName);
 }
