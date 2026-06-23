@@ -26,7 +26,9 @@ public class AiAdvisorService {
     @Value("${app.ai.gemini-model:gemini-2.0-flash}")
     private String geminiModel;
 
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient = RestClient.builder()
+            .baseUrl("https://generativelanguage.googleapis.com")
+            .build();
 
     public boolean isLlmEnabled() {
         return geminiKey != null && !geminiKey.isBlank();
@@ -37,7 +39,10 @@ public class AiAdvisorService {
             try {
                 return callGemini(items, lookbackDays, horizonDays);
             } catch (Exception e) {
-                log.warn("Gemini call failed, falling back to rule-based advice: {}", e.getMessage());
+                log.warn("Gemini call failed, falling back to rule-based advice: {}", e.toString());
+                return ruleBased(items, horizonDays)
+                        + "\n\n(Lưu ý: chưa gọi được Gemini — " + shortMsg(e)
+                        + ". Đang dùng phân tích dự phòng.)";
             }
         }
         return ruleBased(items, horizonDays);
@@ -47,22 +52,32 @@ public class AiAdvisorService {
     @SuppressWarnings("unchecked")
     private String callGemini(List<ForecastItem> items, int lookbackDays, int horizonDays) {
         String prompt = buildPrompt(items, lookbackDays, horizonDays);
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/"
-                + geminiModel + ":generateContent?key=" + geminiKey;
+        String path = "/v1beta/models/" + geminiModel + ":generateContent";
 
         Map<String, Object> body = Map.of(
                 "contents", List.of(Map.of("parts", List.of(Map.of("text", prompt)))));
 
         Map<String, Object> resp = restClient.post()
-                .uri(url)
+                .uri(path)
+                .header("x-goog-api-key", geminiKey)
+                .header("Content-Type", "application/json")
                 .body(body)
                 .retrieve()
                 .body(Map.class);
 
         List<Map<String, Object>> candidates = (List<Map<String, Object>>) resp.get("candidates");
+        if (candidates == null || candidates.isEmpty()) {
+            throw new IllegalStateException("Gemini returned no candidates");
+        }
         Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
         List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
         return (String) parts.get(0).get("text");
+    }
+
+    private String shortMsg(Exception e) {
+        String m = e.getMessage();
+        if (m == null) m = e.getClass().getSimpleName();
+        return m.length() > 220 ? m.substring(0, 220) + "..." : m;
     }
 
     private String buildPrompt(List<ForecastItem> items, int lookbackDays, int horizonDays) {
@@ -94,7 +109,7 @@ public class AiAdvisorService {
             sb.append("• Tồn kho đang ở mức an toàn, chưa có nguyên vật liệu nào cần nhập gấp.\n");
         }
         for (ForecastItem i : critical) {
-            sb.append(String.format("• ⚠ KHẨN: %s sắp hết (còn ~%s ngày). Nên nhập thêm %s %s.\n",
+            sb.append(String.format("• KHẨN: %s sắp hết (còn ~%s ngày). Nên nhập thêm %s %s.\n",
                     i.materialName(),
                     i.daysToStockout() == null ? "?" : i.daysToStockout(),
                     i.recommendedReorderQty(), i.unit()));
@@ -103,7 +118,7 @@ public class AiAdvisorService {
             sb.append(String.format("• Theo dõi: %s dưới định mức/sắp thấp. Cân nhắc nhập %s %s.\n",
                     i.materialName(), i.recommendedReorderQty(), i.unit()));
         }
-        sb.append("• Gợi ý: đặt hàng trước ").append(7).append(" ngày so với ngày dự kiến hết để tránh đứt hàng.");
+        sb.append("• Gợi ý: đặt hàng trước 7 ngày so với ngày dự kiến hết để tránh đứt hàng.");
         return sb.toString();
     }
 }
