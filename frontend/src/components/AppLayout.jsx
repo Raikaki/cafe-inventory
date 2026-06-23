@@ -4,7 +4,7 @@ import {
   DashboardOutlined, InboxOutlined, CoffeeOutlined, ExperimentOutlined,
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
   LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
-  FileTextOutlined, DatabaseOutlined, QrcodeOutlined,
+  FileTextOutlined, DatabaseOutlined, QrcodeOutlined, AppstoreOutlined, TeamOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -13,30 +13,42 @@ import client from '../api/client'
 const { Header, Sider, Content } = Layout
 const { useBreakpoint } = Grid
 
-const items = [
-  { type: 'group', label: 'TỔNG QUAN', children: [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
-  ]},
-  { type: 'group', label: 'DANH MỤC', children: [
+const menuItems = [
+  { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard' },
+  { key: 'cat', icon: <AppstoreOutlined />, label: 'Danh mục', children: [
     { key: '/materials', icon: <InboxOutlined />, label: 'Nguyên vật liệu' },
     { key: '/products', icon: <CoffeeOutlined />, label: 'Sản phẩm' },
     { key: '/recipes', icon: <ExperimentOutlined />, label: 'Công thức (BOM)' },
   ]},
-  { type: 'group', label: 'NGHIỆP VỤ', children: [
+  { key: 'ops', icon: <SwapOutlined />, label: 'Nghiệp vụ', children: [
     { key: '/goods-receipts', icon: <ImportOutlined />, label: 'Nhập kho' },
     { key: '/sales', icon: <ShoppingCartOutlined />, label: 'Bán hàng' },
   ]},
-  { type: 'group', label: 'KHO & BÁO CÁO', children: [
+  { key: 'wh', icon: <DatabaseOutlined />, label: 'Kho & Báo cáo', children: [
     { key: '/inventory', icon: <SwapOutlined />, label: 'Sổ kho' },
-    { key: '/inventory-balance', icon: <FileTextOutlined />, label: 'Tổng hợp tồn theo kỳ' },
-    { key: '/stock-summary', icon: <DatabaseOutlined />, label: 'Chốt tồn & giá (tháng)' },
+    { key: '/inventory-balance', icon: <FileTextOutlined />, label: 'Tổng hợp theo kỳ' },
+    { key: '/stock-summary', icon: <DatabaseOutlined />, label: 'Chốt tồn & giá' },
     { key: '/low-stock', icon: <WarningOutlined />, label: 'Cảnh báo tồn thấp' },
     { key: '/forecast', icon: <ThunderboltOutlined />, label: 'Dự báo tồn (AI)' },
   ]},
-  { type: 'group', label: 'NHÂN SỰ', children: [
+  { key: 'hr', icon: <TeamOutlined />, label: 'Nhân sự', children: [
     { key: '/attendance', icon: <QrcodeOutlined />, label: 'Chấm công QR' },
   ]},
 ]
+
+const ROOT_KEYS = ['cat', 'ops', 'wh', 'hr']
+const PATH_PARENT = {
+  '/materials': 'cat', '/products': 'cat', '/recipes': 'cat',
+  '/goods-receipts': 'ops', '/sales': 'ops',
+  '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh',
+  '/attendance': 'hr',
+}
+const TITLES = {
+  '/dashboard': 'Dashboard', '/materials': 'Nguyên vật liệu', '/products': 'Sản phẩm',
+  '/recipes': 'Công thức (BOM)', '/goods-receipts': 'Nhập kho', '/sales': 'Bán hàng',
+  '/inventory': 'Sổ kho', '/inventory-balance': 'Tổng hợp tồn theo kỳ', '/stock-summary': 'Chốt tồn & giá theo tháng',
+  '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
+}
 
 const roleColor = (role) => ({
   ROLE_ADMIN: 'red', ROLE_MANAGER: 'volcano', ROLE_STAFF: 'blue', ROLE_VIEWER: 'default',
@@ -50,6 +62,22 @@ export default function AppLayout() {
   const screens = useBreakpoint()
   const { token } = antdTheme.useToken()
   const [noti, notiCtx] = notification.useNotification()
+
+  const [openKeys, setOpenKeys] = useState(PATH_PARENT[location.pathname] ? [PATH_PARENT[location.pathname]] : ['cat'])
+
+  // keep the parent of the active route open
+  useEffect(() => {
+    const parent = PATH_PARENT[location.pathname]
+    if (parent && !openKeys.includes(parent)) setOpenKeys([parent])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname])
+
+  // accordion: only one parent open at a time
+  const onOpenChange = (keys) => {
+    const latest = keys.find((k) => !openKeys.includes(k))
+    if (latest && ROOT_KEYS.includes(latest)) setOpenKeys([latest])
+    else setOpenKeys(keys.filter((k) => ROOT_KEYS.includes(k)))
+  }
 
   // Low-stock warning shown once per login session
   useEffect(() => {
@@ -79,6 +107,7 @@ export default function AppLayout() {
       }
       sessionStorage.setItem('lowstock_shown', '1')
     }).catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const userMenu = {
@@ -90,31 +119,40 @@ export default function AppLayout() {
     onClick: ({ key }) => { if (key === 'logout') logout() },
   }
 
+  const pageTitle = TITLES[location.pathname] || 'Cafe Inventory'
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       {notiCtx}
       <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} trigger={null}
-             breakpoint="lg" collapsedWidth={screens.xs ? 0 : 80} width={240} theme="dark">
+             breakpoint="lg" collapsedWidth={screens.xs ? 0 : 80} width={250} theme="dark">
         <div className="brand-logo">
-          <CoffeeOutlined style={{ fontSize: 22, color: '#c8964f' }} />
-          {!collapsed && <span>Cafe Inventory</span>}
+          <span className="brand-badge"><CoffeeOutlined /></span>
+          {!collapsed && <span className="brand-text">Cafe Inventory</span>}
         </div>
         <Menu theme="dark" mode="inline"
               selectedKeys={[location.pathname]}
-              onClick={({ key }) => navigate(key)}
-              items={items} />
+              openKeys={collapsed ? undefined : openKeys}
+              onOpenChange={onOpenChange}
+              onClick={({ key }) => { if (!ROOT_KEYS.includes(key)) navigate(key) }}
+              items={menuItems} style={{ borderInlineEnd: 'none' }} />
       </Sider>
 
       <Layout>
-        <Header style={{ padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                         boxShadow: '0 1px 4px rgba(0,0,0,.08)' }}>
-          <div onClick={() => setCollapsed(!collapsed)} style={{ cursor: 'pointer', fontSize: 18 }}>
-            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        <Header className="app-header">
+          <div className="app-header-left">
+            <span className="collapse-btn" onClick={() => setCollapsed(!collapsed)}>
+              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            </span>
+            <span className="page-title">{pageTitle}</span>
           </div>
           <Dropdown menu={userMenu} placement="bottomRight" arrow>
-            <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Avatar style={{ backgroundColor: token.colorPrimary }} icon={<UserOutlined />} />
-              <span style={{ fontWeight: 600 }}>{user?.username}</span>
+            <div className="user-chip">
+              <Avatar size={32} style={{ backgroundColor: token.colorPrimary }} icon={<UserOutlined />} />
+              <div className="user-meta">
+                <span className="user-name">{user?.username}</span>
+                <span className="user-role">{(user?.role || '').replace('ROLE_', '')}</span>
+              </div>
             </div>
           </Dropdown>
         </Header>
