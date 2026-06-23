@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Card, Table, Typography, Tag, Select, Space, Row, Col, Alert, Spin, Button } from 'antd'
+import { Card, Table, Typography, Tag, Select, Space, Row, Col, Spin, Button } from 'antd'
 import { RobotOutlined, ReloadOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import client from '../api/client'
 import { fmt } from '../utils/format'
@@ -64,11 +64,6 @@ export default function Forecast() {
                   extra={<Tag color={data.aiEnabled ? 'purple' : 'default'}>{data.aiEnabled ? 'Gemini AI' : 'Rule-based'}</Tag>}
                   style={{ height: '100%' }}>
               <Paragraph style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>{data.aiAdvice}</Paragraph>
-              {!data.aiEnabled && (
-                <Alert style={{ marginTop: 12 }} type="info" showIcon
-                       message="Bật AI nâng cao"
-                       description="Thêm biến môi trường GEMINI_API_KEY (lấy free tại aistudio.google.com) để dùng AI Gemini sinh khuyến nghị chi tiết hơn." />
-              )}
             </Card>
           </Col>
           <Col xs={24} lg={16}>
