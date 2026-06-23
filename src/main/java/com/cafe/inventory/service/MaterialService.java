@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -16,6 +17,7 @@ import java.util.List;
 public class MaterialService {
 
     private final MaterialRepository materialRepository;
+    private final InventoryService inventoryService;
 
     public List<MaterialDto> findAll() {
         return materialRepository.findAll().stream().map(MaterialDto::from).toList();
@@ -29,21 +31,52 @@ public class MaterialService {
         return MaterialDto.from(get(id));
     }
 
+    /**
+     * Create a material. Any initial stock is recorded as an "opening" inventory
+     * transaction (not written directly to current_qty) so the ledger stays the
+     * single source of truth.
+     */
     @Transactional
     public MaterialDto create(MaterialDto dto, String user) {
         if (materialRepository.existsByMaterialCode(dto.materialCode())) {
             throw new BusinessException("Material code already exists: " + dto.materialCode());
         }
         Material m = new Material();
-        apply(m, dto);
+        m.setMaterialCode(dto.materialCode());
+        m.setMaterialName(dto.materialName());
+        m.setUnit(dto.unit());
+        m.setMinimumQty(nz(dto.minimumQty()));
+        m.setMaximumQty(nz(dto.maximumQty()));
+        m.setAverageCost(nz(dto.averageCost()));
+        m.setCurrentQty(BigDecimal.ZERO);
+        m.setActiveFlag(dto.activeFlag() == null ? true : dto.activeFlag());
         m.setCreatedBy(user);
-        return MaterialDto.from(materialRepository.save(m));
+        Material saved = materialRepository.save(m);
+
+        BigDecimal opening = nz(dto.currentQty());
+        if (opening.compareTo(BigDecimal.ZERO) != 0) {
+            inventoryService.adjust(saved.getId(), opening, "OPENING", user, "Tồn đầu kỳ");
+        }
+        return MaterialDto.from(get(saved.getId()));
     }
 
+    /**
+     * Update material attributes. Stock fields (current_qty) are intentionally
+     * NOT editable here — stock only changes through inventory transactions
+     * (goods receipt, sales consumption, adjustment).
+     */
     @Transactional
     public MaterialDto update(Long id, MaterialDto dto, String user) {
         Material m = get(id);
-        apply(m, dto);
+        m.setMaterialCode(dto.materialCode());
+        m.setMaterialName(dto.materialName());
+        m.setUnit(dto.unit());
+        m.setMinimumQty(nz(dto.minimumQty()));
+        m.setMaximumQty(nz(dto.maximumQty()));
+        m.setAverageCost(nz(dto.averageCost()));
+        if (dto.activeFlag() != null) {
+            m.setActiveFlag(dto.activeFlag());
+        }
         m.setUpdatedBy(user);
         return MaterialDto.from(materialRepository.save(m));
     }
@@ -55,17 +88,8 @@ public class MaterialService {
         materialRepository.save(m);
     }
 
-    private void apply(Material m, MaterialDto dto) {
-        m.setMaterialCode(dto.materialCode());
-        m.setMaterialName(dto.materialName());
-        m.setUnit(dto.unit());
-        m.setCurrentQty(dto.currentQty());
-        m.setMinimumQty(dto.minimumQty());
-        m.setMaximumQty(dto.maximumQty());
-        m.setAverageCost(dto.averageCost());
-        if (dto.activeFlag() != null) {
-            m.setActiveFlag(dto.activeFlag());
-        }
+    private BigDecimal nz(BigDecimal v) {
+        return v == null ? BigDecimal.ZERO : v;
     }
 
     private Material get(Long id) {

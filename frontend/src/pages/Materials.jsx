@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import {
   Card, Table, Button, Modal, Form, Input, InputNumber, Space, Tag, Popconfirm,
-  Typography, message, Row, Col,
+  Typography, message, Row, Col, Tooltip,
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, SlidersOutlined } from '@ant-design/icons'
 import client from '../api/client'
 import { fmt } from '../utils/format'
 
-const { Title } = Typography
+const { Title, Text } = Typography
 
 export default function Materials() {
   const [data, setData] = useState([])
@@ -15,6 +15,10 @@ export default function Materials() {
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(null)
   const [form] = Form.useForm()
+
+  const [adjOpen, setAdjOpen] = useState(false)
+  const [adjMat, setAdjMat] = useState(null)
+  const [adjForm] = Form.useForm()
 
   const load = () => {
     setLoading(true)
@@ -43,6 +47,19 @@ export default function Materials() {
     catch (e) { message.error(e.response?.data?.message || 'Lỗi') }
   }
 
+  const openAdjust = (r) => { setAdjMat(r); adjForm.resetFields(); adjForm.setFieldsValue({ quantity: 0 }); setAdjOpen(true) }
+  const submitAdjust = async () => {
+    const v = await adjForm.validateFields()
+    if (Number(v.quantity) === 0) { message.warning('Nhập số lượng điều chỉnh khác 0'); return }
+    try {
+      await client.post('/api/inventory/adjust', { materialId: adjMat.id, quantity: v.quantity, reason: v.reason })
+      message.success('Đã điều chỉnh tồn (ghi nhận giao dịch)')
+      setAdjOpen(false); load()
+    } catch (e) {
+      message.error(e.response?.data?.message || 'Lỗi điều chỉnh')
+    }
+  }
+
   const columns = [
     { title: 'Mã', dataIndex: 'materialCode', width: 110, fixed: 'left' },
     { title: 'Tên nguyên vật liệu', dataIndex: 'materialName' },
@@ -54,9 +71,14 @@ export default function Materials() {
     { title: 'Giá vốn TB', dataIndex: 'averageCost', align: 'right', width: 120, render: fmt },
     { title: 'Trạng thái', dataIndex: 'activeFlag', width: 110, align: 'center',
       render: (v) => v ? <Tag color="green">Hoạt động</Tag> : <Tag>Ngừng</Tag> },
-    { title: '', width: 100, fixed: 'right', render: (_, r) => (
+    { title: '', width: 140, fixed: 'right', render: (_, r) => (
       <Space>
-        <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(r)} />
+        <Tooltip title="Điều chỉnh tồn">
+          <Button size="small" icon={<SlidersOutlined />} onClick={() => openAdjust(r)} />
+        </Tooltip>
+        <Tooltip title="Sửa thông tin">
+          <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(r)} />
+        </Tooltip>
         <Popconfirm title="Ngừng sử dụng vật liệu này?" onConfirm={() => remove(r)}>
           <Button size="small" danger icon={<DeleteOutlined />} />
         </Popconfirm>
@@ -76,9 +98,10 @@ export default function Materials() {
 
       <Card bodyStyle={{ padding: 0 }}>
         <Table rowKey="id" loading={loading} dataSource={data} columns={columns}
-               scroll={{ x: 1000 }} pagination={{ pageSize: 12, showSizeChanger: false }} />
+               scroll={{ x: 1050 }} pagination={{ pageSize: 12, showSizeChanger: false }} />
       </Card>
 
+      {/* Create / edit */}
       <Modal title={editing ? 'Sửa nguyên vật liệu' : 'Thêm nguyên vật liệu'} open={open}
              onOk={submit} onCancel={() => setOpen(false)} okText="Lưu" cancelText="Huỷ" width={560} destroyOnClose>
         <Form form={form} layout="vertical">
@@ -88,13 +111,34 @@ export default function Materials() {
           </Row>
           <Form.Item name="materialName" label="Tên" rules={[{ required: true }]}><Input /></Form.Item>
           <Row gutter={12}>
-            <Col span={12}><Form.Item name="currentQty" label="Tồn kho"><InputNumber style={{ width: '100%' }} min={0} /></Form.Item></Col>
+            <Col span={12}>
+              <Form.Item name="currentQty" label={editing ? 'Tồn kho hiện tại' : 'Tồn kho đầu kỳ'}
+                         extra={editing
+                           ? 'Tồn chỉ thay đổi qua Nhập kho / Bán hàng / Điều chỉnh'
+                           : 'Sẽ được ghi nhận thành giao dịch tồn đầu kỳ'}>
+                <InputNumber style={{ width: '100%' }} min={0} disabled={!!editing} />
+              </Form.Item>
+            </Col>
             <Col span={12}><Form.Item name="averageCost" label="Giá vốn TB"><InputNumber style={{ width: '100%' }} min={0} /></Form.Item></Col>
           </Row>
           <Row gutter={12}>
             <Col span={12}><Form.Item name="minimumQty" label="Tồn tối thiểu"><InputNumber style={{ width: '100%' }} min={0} /></Form.Item></Col>
             <Col span={12}><Form.Item name="maximumQty" label="Tồn tối đa"><InputNumber style={{ width: '100%' }} min={0} /></Form.Item></Col>
           </Row>
+        </Form>
+      </Modal>
+
+      {/* Adjust stock */}
+      <Modal title={`Điều chỉnh tồn: ${adjMat?.materialName || ''}`} open={adjOpen}
+             onOk={submitAdjust} onCancel={() => setAdjOpen(false)} okText="Ghi nhận" cancelText="Huỷ" destroyOnClose>
+        <Text type="secondary">Tồn hiện tại: <b>{fmt(adjMat?.currentQty)} {adjMat?.unit}</b></Text>
+        <Form form={adjForm} layout="vertical" style={{ marginTop: 12 }}>
+          <Form.Item name="quantity" label="Số lượng điều chỉnh (dương = tăng, âm = giảm)" rules={[{ required: true }]}>
+            <InputNumber style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="reason" label="Lý do">
+            <Input placeholder="Hỏng, hết hạn, kiểm kê, hao hụt..." />
+          </Form.Item>
         </Form>
       </Modal>
     </>
