@@ -33,6 +33,7 @@ const menuItems = [
   ]},
   { key: 'hr', icon: <TeamOutlined />, label: 'Nhân sự', children: [
     { key: '/attendance', icon: <QrcodeOutlined />, label: 'Chấm công QR' },
+    { key: '/timesheet', icon: <FileTextOutlined />, label: 'Bảng công tháng' },
   ]},
 ]
 
@@ -41,13 +42,14 @@ const PATH_PARENT = {
   '/materials': 'cat', '/products': 'cat', '/recipes': 'cat',
   '/goods-receipts': 'ops', '/sales': 'ops',
   '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh',
-  '/attendance': 'hr',
+  '/attendance': 'hr', '/timesheet': 'hr',
 }
 const TITLES = {
   '/dashboard': 'Dashboard', '/materials': 'Nguyên vật liệu', '/products': 'Sản phẩm',
   '/recipes': 'Công thức (BOM)', '/goods-receipts': 'Nhập kho', '/sales': 'Bán hàng',
   '/inventory': 'Sổ kho', '/inventory-balance': 'Tổng hợp tồn theo kỳ', '/stock-summary': 'Chốt tồn & giá theo tháng',
   '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
+  '/timesheet': 'Bảng công tháng',
 }
 
 const roleColor = (role) => ({

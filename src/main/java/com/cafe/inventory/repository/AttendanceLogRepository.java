@@ -10,4 +10,5 @@ public interface AttendanceLogRepository extends JpaRepository<AttendanceLog, Lo
     List<AttendanceLog> findByQrDateOrderByScanTimeDesc(LocalDate qrDate);
     List<AttendanceLog> findByQrDateAndEmployeeNameIgnoreCaseOrderByScanTimeAsc(LocalDate qrDate, String employeeName);
     long deleteByQrDateBefore(LocalDate date);
+    List<AttendanceLog> findByQrDateBetween(LocalDate from, LocalDate to);
 }
