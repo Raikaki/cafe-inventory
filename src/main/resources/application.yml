@@ -49,6 +49,11 @@ app:
     password: ${ADMIN_PASSWORD:admin123}
     full-name: System Administrator
     email: ${ADMIN_EMAIL:admin@cafe.local}
+  ai:
+    # Optional: free Google Gemini API key (https://aistudio.google.com/apikey).
+    # If empty, the forecast uses a built-in rule-based advisor instead.
+    gemini-key: ${GEMINI_API_KEY:}
+    gemini-model: ${GEMINI_MODEL:gemini-1.5-flash}
 
 springdoc:
   swagger-ui:

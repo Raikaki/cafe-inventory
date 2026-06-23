@@ -1,12 +1,13 @@
-import { useState } from 'react'
-import { Layout, Menu, Avatar, Dropdown, Tag, Grid, theme as antdTheme } from 'antd'
+import { useState, useEffect } from 'react'
+import { Layout, Menu, Avatar, Dropdown, Tag, Grid, notification, theme as antdTheme } from 'antd'
 import {
   DashboardOutlined, InboxOutlined, CoffeeOutlined, ExperimentOutlined,
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
-  LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined,
+  LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import client from '../api/client'
 
 const { Header, Sider, Content } = Layout
 const { useBreakpoint } = Grid
@@ -27,6 +28,7 @@ const items = [
   { type: 'group', label: 'KHO & BÁO CÁO', children: [
     { key: '/inventory', icon: <SwapOutlined />, label: 'Sổ kho' },
     { key: '/low-stock', icon: <WarningOutlined />, label: 'Cảnh báo tồn thấp' },
+    { key: '/forecast', icon: <ThunderboltOutlined />, label: 'Dự báo tồn (AI)' },
   ]},
 ]
 
@@ -41,6 +43,37 @@ export default function AppLayout() {
   const { user, logout } = useAuth()
   const screens = useBreakpoint()
   const { token } = antdTheme.useToken()
+  const [noti, notiCtx] = notification.useNotification()
+
+  // Low-stock warning shown once per login session
+  useEffect(() => {
+    if (!user) return
+    if (sessionStorage.getItem('lowstock_shown')) return
+    client.get('/api/inventory/low-stock').then((res) => {
+      const list = res.data || []
+      if (list.length > 0) {
+        noti.warning({
+          message: `Cảnh báo tồn kho: ${list.length} nguyên vật liệu dưới định mức`,
+          description: (
+            <div>
+              <ul style={{ paddingLeft: 18, margin: '4px 0' }}>
+                {list.slice(0, 5).map((m) => (
+                  <li key={m.id}>{m.materialName}: còn <b style={{ color: '#cf1322' }}>{m.currentQty}</b> {m.unit} (tối thiểu {m.minimumQty})</li>
+                ))}
+              </ul>
+              {list.length > 5 && <span>... và {list.length - 5} loại khác.</span>}
+              <div style={{ marginTop: 8 }}>
+                <a onClick={() => navigate('/low-stock')}>Xem chi tiết →</a>
+              </div>
+            </div>
+          ),
+          duration: 0,
+          placement: 'topRight',
+        })
+      }
+      sessionStorage.setItem('lowstock_shown', '1')
+    }).catch(() => {})
+  }, [user])
 
   const userMenu = {
     items: [
@@ -53,6 +86,7 @@ export default function AppLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
+      {notiCtx}
       <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} trigger={null}
              breakpoint="lg" collapsedWidth={screens.xs ? 0 : 80} width={240} theme="dark">
         <div className="brand-logo">

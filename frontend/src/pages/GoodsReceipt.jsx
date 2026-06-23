@@ -1,32 +1,24 @@
 import { useEffect, useState } from 'react'
 import {
   Card, Form, DatePicker, Select, Input, Button, Table, InputNumber, Space,
-  Typography, message, Row, Col, Result,
+  Typography, message, Row, Col, Result, Tabs, Upload, Alert,
 } from 'antd'
-import { PlusOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons'
+import { PlusOutlined, DeleteOutlined, SaveOutlined, ImportOutlined, InboxOutlined, EditOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
 import { fmt } from '../utils/format'
 
-const { Title } = Typography
+const { Title, Text } = Typography
+const { Dragger } = Upload
 
-export default function GoodsReceipt() {
-  const [materials, setMaterials] = useState([])
-  const [suppliers, setSuppliers] = useState([])
+function ManualReceipt({ materials, suppliers, onDone }) {
   const [lines, setLines] = useState([{ key: 1, materialId: null, quantity: 0, unitPrice: 0 }])
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
-  const [done, setDone] = useState(null)
-
-  useEffect(() => {
-    client.get('/api/materials').then((r) => setMaterials(r.data))
-    client.get('/api/suppliers').then((r) => setSuppliers(r.data)).catch(() => {})
-  }, [])
 
   const addLine = () => setLines((p) => [...p, { key: Date.now(), materialId: null, quantity: 0, unitPrice: 0 }])
   const removeLine = (key) => setLines((p) => p.filter((l) => l.key !== key))
   const updateLine = (key, f, v) => setLines((p) => p.map((l) => l.key === key ? { ...l, [f]: v } : l))
-
   const total = lines.reduce((s, l) => s + Number(l.quantity || 0) * Number(l.unitPrice || 0), 0)
 
   const submit = async () => {
@@ -40,26 +32,9 @@ export default function GoodsReceipt() {
     }
     if (payload.lines.length === 0) { message.warning('Thêm ít nhất 1 dòng nguyên liệu'); return }
     setSaving(true)
-    try {
-      const res = await client.post('/api/goods-receipts', payload)
-      setDone(res.data)
-    } catch (e) { message.error(e.response?.data?.message || 'Lỗi khi lưu') }
+    try { const res = await client.post('/api/goods-receipts', payload); onDone(res.data) }
+    catch (e) { message.error(e.response?.data?.message || 'Lỗi khi lưu') }
     finally { setSaving(false) }
-  }
-
-  const reset = () => {
-    setDone(null); form.resetFields()
-    form.setFieldsValue({ receiptDate: dayjs() })
-    setLines([{ key: 1, materialId: null, quantity: 0, unitPrice: 0 }])
-  }
-
-  if (done) {
-    return (
-      <Result status="success"
-        title={`Đã tạo phiếu nhập ${done.receiptNo}`}
-        subTitle={`Tổng tiền: ${fmt(done.totalAmount)} đ — tồn kho & giá vốn đã được cập nhật tự động.`}
-        extra={<Button type="primary" onClick={reset}>Tạo phiếu mới</Button>} />
-    )
   }
 
   const columns = [
@@ -80,32 +55,87 @@ export default function GoodsReceipt() {
 
   return (
     <>
+      <Form form={form} layout="vertical" initialValues={{ receiptDate: dayjs() }}>
+        <Row gutter={16}>
+          <Col xs={24} md={6}><Form.Item name="receiptDate" label="Ngày nhập" rules={[{ required: true }]}>
+            <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" /></Form.Item></Col>
+          <Col xs={24} md={8}><Form.Item name="supplierId" label="Nhà cung cấp">
+            <Select allowClear placeholder="Chọn nhà cung cấp"
+                    options={suppliers.map((s) => ({ value: s.id, label: s.supplierName }))} /></Form.Item></Col>
+          <Col xs={24} md={10}><Form.Item name="note" label="Ghi chú"><Input /></Form.Item></Col>
+        </Row>
+      </Form>
+      <Table rowKey="key" dataSource={lines} columns={columns} pagination={false} size="small"
+             summary={() => (
+               <Table.Summary.Row>
+                 <Table.Summary.Cell colSpan={3} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
+                 <Table.Summary.Cell index={1} align="right"><b style={{ color: '#a0522d' }}>{fmt(total)} đ</b></Table.Summary.Cell>
+                 <Table.Summary.Cell index={2} />
+               </Table.Summary.Row>
+             )} />
+      <Space style={{ marginTop: 16 }}>
+        <Button icon={<PlusOutlined />} onClick={addLine}>Thêm dòng</Button>
+        <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={submit}>Lưu phiếu nhập</Button>
+      </Space>
+    </>
+  )
+}
+
+function ImportReceipt({ onDone }) {
+  const [uploading, setUploading] = useState(false)
+  const customRequest = async ({ file, onSuccess, onError }) => {
+    setUploading(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    try {
+      const res = await client.post('/api/goods-receipts/import', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      message.success('Import thành công & đã tăng tồn kho')
+      onDone(res.data); onSuccess()
+    } catch (e) { message.error(e.response?.data?.message || 'Lỗi import'); onError(e) }
+    finally { setUploading(false) }
+  }
+  return (
+    <>
+      <Alert style={{ marginBottom: 16 }} type="info" showIcon message="Định dạng file"
+             description={<span>Cột: <Text code>Material Code</Text> | <Text code>Quantity</Text> | <Text code>Unit Price</Text>. Ví dụ: <Text code>MAT001, 5000, 0.3</Text>. Hỗ trợ .xlsx và .csv.</span>} />
+      <Dragger accept=".xlsx,.csv" customRequest={customRequest} showUploadList={false} disabled={uploading}>
+        <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+        <p className="ant-upload-text">Kéo thả hoặc bấm để chọn file Excel/CSV</p>
+        <p className="ant-upload-hint">Tạo 1 phiếu nhập (ngày hôm nay) và tăng tồn kho tự động</p>
+      </Dragger>
+    </>
+  )
+}
+
+export default function GoodsReceipt() {
+  const [materials, setMaterials] = useState([])
+  const [suppliers, setSuppliers] = useState([])
+  const [done, setDone] = useState(null)
+
+  useEffect(() => {
+    client.get('/api/materials').then((r) => setMaterials(r.data))
+    client.get('/api/suppliers').then((r) => setSuppliers(r.data)).catch(() => {})
+  }, [])
+
+  if (done) {
+    return (
+      <Result status="success"
+        title={`Đã tạo phiếu nhập ${done.receiptNo}`}
+        subTitle={`Tổng tiền: ${fmt(done.totalAmount)} đ — tồn kho & giá vốn đã được cập nhật tự động.`}
+        extra={<Button type="primary" onClick={() => setDone(null)}>Tạo phiếu mới</Button>} />
+    )
+  }
+
+  return (
+    <>
       <Title level={3} style={{ marginTop: 0 }}>Phiếu nhập kho</Title>
       <Card>
-        <Form form={form} layout="vertical" initialValues={{ receiptDate: dayjs() }}>
-          <Row gutter={16}>
-            <Col xs={24} md={6}><Form.Item name="receiptDate" label="Ngày nhập" rules={[{ required: true }]}>
-              <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" /></Form.Item></Col>
-            <Col xs={24} md={8}><Form.Item name="supplierId" label="Nhà cung cấp">
-              <Select allowClear placeholder="Chọn nhà cung cấp"
-                      options={suppliers.map((s) => ({ value: s.id, label: s.supplierName }))} /></Form.Item></Col>
-            <Col xs={24} md={10}><Form.Item name="note" label="Ghi chú"><Input /></Form.Item></Col>
-          </Row>
-        </Form>
-
-        <Table rowKey="key" dataSource={lines} columns={columns} pagination={false} size="small"
-               summary={() => (
-                 <Table.Summary.Row>
-                   <Table.Summary.Cell colSpan={3} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
-                   <Table.Summary.Cell index={1} align="right"><b style={{ color: '#a0522d' }}>{fmt(total)} đ</b></Table.Summary.Cell>
-                   <Table.Summary.Cell index={2} />
-                 </Table.Summary.Row>
-               )} />
-
-        <Space style={{ marginTop: 16 }}>
-          <Button icon={<PlusOutlined />} onClick={addLine}>Thêm dòng</Button>
-          <Button type="primary" icon={<SaveOutlined />} loading={saving} onClick={submit}>Lưu phiếu nhập</Button>
-        </Space>
+        <Tabs items={[
+          { key: 'manual', label: <span><EditOutlined /> Nhập tay</span>,
+            children: <ManualReceipt materials={materials} suppliers={suppliers} onDone={setDone} /> },
+          { key: 'import', label: <span><ImportOutlined /> Import Excel/CSV</span>,
+            children: <ImportReceipt onDone={setDone} /> },
+        ]} />
       </Card>
     </>
   )

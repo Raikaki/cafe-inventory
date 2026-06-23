@@ -19,12 +19,14 @@ export function AuthProvider({ children }) {
   const login = async (username, password) => {
     const res = await client.post('/api/auth/login', { username, password })
     localStorage.setItem('token', res.data.token)
+    sessionStorage.removeItem('lowstock_shown')
     setUser({ username: res.data.username, role: res.data.role })
     return res.data
   }
 
   const logout = () => {
     localStorage.removeItem('token')
+    sessionStorage.removeItem('lowstock_shown')
     setUser(null)
     window.location.href = '/login'
   }

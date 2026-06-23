@@ -17,3 +17,4 @@ body {
 }
 .site-content { padding: 24px; }
 .ant-layout-sider { box-shadow: 2px 0 8px rgba(0,0,0,.08); }
+.row-critical > td { background: #fff1f0 !important; }

@@ -14,8 +14,10 @@ Xây dựng theo kiến trúc **SQL First** với **Java 21 + Spring Boot 3 (RES
 | Nguyên vật liệu | CRUD, đơn vị tính, tồn kho, định mức min/max, giá vốn trung bình |
 | Sản phẩm | CRUD các loại nước bán ra |
 | Công thức (BOM) | Định nghĩa định mức nguyên liệu cho mỗi sản phẩm + **tự tính giá vốn** |
-| Nhập kho | Phiếu nhập (GR2026xxxxxx) → tăng tồn + cập nhật **giá vốn bình quân gia quyền** |
+| Nhập kho | Phiếu nhập (GR2026xxxxxx), nhập tay hoặc **import Excel/CSV** → tăng tồn + **giá vốn bình quân gia quyền** |
 | Bán hàng | Nhập tay hoặc **import Excel/CSV** → nổ công thức → **tự trừ kho** |
+| Cảnh báo đăng nhập | Popup cảnh báo nguyên vật liệu dưới định mức ngay khi vừa login |
+| Dự báo AI | Dự báo ngày hết hàng + đề xuất lượng nhập (engine thống kê) + khuyến nghị **Google Gemini** (tuỳ chọn, free) |
 | Sổ kho | Mọi biến động ghi vào `inventory_transactions` (before/after qty) |
 | Dashboard | KPI (sản phẩm, vật liệu, giá trị tồn, doanh thu hôm nay, sắp hết hàng) + biểu đồ top bán chạy (Recharts) |
 | Sổ kho / Cảnh báo | Lịch sử biến động tồn + danh sách vật liệu dưới định mức |

@@ -11,6 +11,7 @@ import GoodsReceipt from './pages/GoodsReceipt'
 import Sales from './pages/Sales'
 import Inventory from './pages/Inventory'
 import LowStock from './pages/LowStock'
+import Forecast from './pages/Forecast'
 
 function Protected({ children }) {
   const { user, loading } = useAuth()
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/sales" element={<Sales />} />
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/low-stock" element={<LowStock />} />
+        <Route path="/forecast" element={<Forecast />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
