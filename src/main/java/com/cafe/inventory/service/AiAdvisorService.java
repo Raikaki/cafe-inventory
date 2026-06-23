@@ -23,7 +23,7 @@ public class AiAdvisorService {
     @Value("${app.ai.gemini-key:}")
     private String geminiKey;
 
-    @Value("${app.ai.gemini-model:gemini-1.5-flash}")
+    @Value("${app.ai.gemini-model:gemini-2.0-flash}")
     private String geminiModel;
 
     private final RestClient restClient = RestClient.create();
