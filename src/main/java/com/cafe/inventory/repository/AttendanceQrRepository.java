@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface AttendanceQrRepository extends JpaRepository<AttendanceQr, Long> {
     Optional<AttendanceQr> findByQrDate(LocalDate qrDate);
+    long deleteByQrDateBefore(LocalDate date);
 }

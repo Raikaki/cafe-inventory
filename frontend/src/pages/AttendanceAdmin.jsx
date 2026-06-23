@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Card, Row, Col, Typography, Table, Button, DatePicker, Space, Tag, message, Alert } from 'antd'
-import { ReloadOutlined, QrcodeOutlined, EnvironmentOutlined } from '@ant-design/icons'
+import { Card, Row, Col, Typography, Table, Button, DatePicker, Space, Tag, message, Alert, InputNumber, Switch } from 'antd'
+import { ReloadOutlined, QrcodeOutlined, EnvironmentOutlined, AimOutlined, SaveOutlined } from '@ant-design/icons'
 import { QRCodeSVG } from 'qrcode.react'
 import dayjs from 'dayjs'
 import client from '../api/client'
@@ -13,13 +13,37 @@ export default function AttendanceAdmin() {
   const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(false)
 
+  const [loc, setLoc] = useState({ latitude: null, longitude: null, radiusMeters: 200, activeFlag: false })
+  const [savingLoc, setSavingLoc] = useState(false)
+
   const loadQr = () => client.get('/api/attendance/qr/today').then((r) => setQr(r.data))
+  const loadLoc = () => client.get('/api/attendance/location').then((r) => r.data && setLoc({
+    latitude: r.data.latitude, longitude: r.data.longitude,
+    radiusMeters: r.data.radiusMeters ?? 200, activeFlag: !!r.data.activeFlag,
+  }))
+
+  const useCurrentPosition = () => {
+    if (!navigator.geolocation) { message.error('Trình duyệt không hỗ trợ định vị'); return }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => { setLoc((p) => ({ ...p, latitude: pos.coords.latitude, longitude: pos.coords.longitude })); message.success('Đã lấy vị trí hiện tại') },
+      () => message.error('Không lấy được vị trí (bạn cần cho phép định vị)'),
+      { enableHighAccuracy: true, timeout: 8000 }
+    )
+  }
+
+  const saveLoc = () => {
+    setSavingLoc(true)
+    client.put('/api/attendance/location', loc)
+      .then(() => message.success('Đã lưu cài đặt vị trí quán'))
+      .catch((e) => message.error(e.response?.data?.message || 'Lỗi lưu'))
+      .finally(() => setSavingLoc(false))
+  }
   const loadLogs = () => {
     setLoading(true)
     client.get(`/api/attendance/logs?date=${date.format('YYYY-MM-DD')}`)
       .then((r) => setLogs(r.data)).finally(() => setLoading(false))
   }
-  useEffect(() => { loadQr() }, [])
+  useEffect(() => { loadQr(); loadLoc() }, [])
   useEffect(() => { loadLogs() }, [date])
 
   const checkinUrl = qr ? `${window.location.origin}${qr.checkinPath}` : ''
@@ -80,6 +104,36 @@ export default function AttendanceAdmin() {
                        message="Mã đổi mới mỗi ngày; mã của ngày hôm trước sẽ không dùng được." />
               </>
             )}
+          </Card>
+
+          <Card title={<span><AimOutlined /> Vị trí quán (chống chấm công từ xa)</span>} style={{ marginTop: 16 }}>
+            <Space direction="vertical" style={{ width: '100%' }} size={10}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span>Bật giới hạn vị trí</span>
+                <Switch checked={loc.activeFlag} onChange={(v) => setLoc((p) => ({ ...p, activeFlag: v }))} />
+              </div>
+              <Row gutter={8}>
+                <Col span={12}>
+                  <InputNumber style={{ width: '100%' }} placeholder="Vĩ độ (lat)" value={loc.latitude}
+                               onChange={(v) => setLoc((p) => ({ ...p, latitude: v }))} />
+                </Col>
+                <Col span={12}>
+                  <InputNumber style={{ width: '100%' }} placeholder="Kinh độ (lng)" value={loc.longitude}
+                               onChange={(v) => setLoc((p) => ({ ...p, longitude: v }))} />
+                </Col>
+              </Row>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>Bán kính (m):</span>
+                <InputNumber min={10} max={5000} value={loc.radiusMeters}
+                             onChange={(v) => setLoc((p) => ({ ...p, radiusMeters: v }))} />
+              </div>
+              <Button icon={<AimOutlined />} onClick={useCurrentPosition} block>Dùng vị trí hiện tại của tôi</Button>
+              <Button type="primary" icon={<SaveOutlined />} loading={savingLoc} onClick={saveLoc} block>Lưu cài đặt</Button>
+              <Alert type="warning" showIcon
+                     message={loc.activeFlag
+                       ? `Chỉ chấm công được trong bán kính ${loc.radiusMeters}m quanh quán.`
+                       : 'Đang TẮT — nhân viên chấm công được ở bất kỳ đâu. Bật công tắc để giới hạn theo vị trí quán.'} />
+            </Space>
           </Card>
         </Col>
 

@@ -9,6 +9,13 @@ public class AttendanceDtos {
 
     public record TokenResponse(LocalDate date, String token, String checkinPath) {}
 
+    public record LocationSetting(
+            BigDecimal latitude,
+            BigDecimal longitude,
+            Integer radiusMeters,
+            Boolean activeFlag
+    ) {}
+
     public record CheckinRequest(
             @NotBlank String token,
             @NotBlank String employeeName,
