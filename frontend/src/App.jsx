@@ -13,6 +13,7 @@ import Inventory from './pages/Inventory'
 import LowStock from './pages/LowStock'
 import Forecast from './pages/Forecast'
 import InventoryBalance from './pages/InventoryBalance'
+import StockSummary from './pages/StockSummary'
 
 function Protected({ children }) {
   const { user, loading } = useAuth()
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/low-stock" element={<LowStock />} />
         <Route path="/inventory-balance" element={<InventoryBalance />} />
+        <Route path="/stock-summary" element={<StockSummary />} />
         <Route path="/forecast" element={<Forecast />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
