@@ -4,6 +4,7 @@ import {
   DashboardOutlined, InboxOutlined, CoffeeOutlined, ExperimentOutlined,
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
   LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -27,6 +28,7 @@ const items = [
   ]},
   { type: 'group', label: 'KHO & BÁO CÁO', children: [
     { key: '/inventory', icon: <SwapOutlined />, label: 'Sổ kho' },
+    { key: '/inventory-balance', icon: <FileTextOutlined />, label: 'Tổng hợp tồn theo kỳ' },
     { key: '/low-stock', icon: <WarningOutlined />, label: 'Cảnh báo tồn thấp' },
     { key: '/forecast', icon: <ThunderboltOutlined />, label: 'Dự báo tồn (AI)' },
   ]},

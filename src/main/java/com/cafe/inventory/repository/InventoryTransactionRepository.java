@@ -13,6 +13,7 @@ public interface InventoryTransactionRepository extends JpaRepository<InventoryT
     List<InventoryTransaction> findByMaterialIdOrderByTxnDateDesc(Long materialId);
     List<InventoryTransaction> findTop50ByOrderByTxnDateDesc();
     List<InventoryTransaction> findByTxnType(TransactionType txnType);
+    List<InventoryTransaction> findAllByOrderByTxnDateAsc();
 
     @Query("SELECT t FROM InventoryTransaction t " +
            "WHERE t.txnType = com.cafe.inventory.entity.TransactionType.SALE_CONSUMPTION " +
