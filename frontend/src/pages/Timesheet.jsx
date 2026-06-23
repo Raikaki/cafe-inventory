@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card, Table, Typography, DatePicker, Button, Space, Row, message, Upload, Alert, Tag } from 'antd'
-import { UploadOutlined, SyncOutlined, EyeOutlined, CalendarOutlined } from '@ant-design/icons'
+import { UploadOutlined, SyncOutlined, EyeOutlined, CalendarOutlined, DownloadOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
 
@@ -48,6 +48,19 @@ export default function Timesheet() {
       message.success(`Đã nhập ${r.data.imported} dòng`); onSuccess(); load()
     } catch (e) { message.error(e.response?.data?.message || 'Lỗi import'); onError(e) }
     finally { setUploading(false) }
+  }
+
+  const downloadTemplate = () => {
+    const sample =
+      'Tên nhân viên,Ngày,Giờ vào,Giờ ra\n' +
+      'Võ Văn Hải,2026-06-01,07:30,17:00\n' +
+      'Bùi Đình Khánh,2026-06-01,07:35,15:32\n' +
+      'Võ Văn Hải,2026-06-02,07:28,16:50\n'
+    const blob = new Blob(['﻿' + sample], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = 'mau_cham_cong.csv'; a.click()
+    URL.revokeObjectURL(url)
   }
 
   // pivot: map[name][day] = record
@@ -109,6 +122,7 @@ export default function Timesheet() {
           <DatePicker picker="month" value={month} onChange={(v) => v && setMonth(v)} format="MM/YYYY" allowClear={false} />
           <Button icon={<EyeOutlined />} onClick={load} loading={loading}>Xem</Button>
           <Button icon={<SyncOutlined />} onClick={sync}>Lấy từ dữ liệu QR</Button>
+          <Button icon={<DownloadOutlined />} onClick={downloadTemplate}>Tải file mẫu</Button>
           <Upload accept=".xlsx,.csv" customRequest={upload} showUploadList={false}>
             <Button type="primary" icon={<UploadOutlined />} loading={uploading}>Upload Excel/CSV</Button>
           </Upload>
