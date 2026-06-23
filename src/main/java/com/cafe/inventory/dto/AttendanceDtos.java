@@ -1,0 +1,26 @@
+package com.cafe.inventory.dto;
+
+import jakarta.validation.constraints.NotBlank;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public class AttendanceDtos {
+
+    public record TokenResponse(LocalDate date, String token, String checkinPath) {}
+
+    public record CheckinRequest(
+            @NotBlank String token,
+            @NotBlank String employeeName,
+            BigDecimal latitude,
+            BigDecimal longitude
+    ) {}
+
+    public record CheckinResponse(
+            String employeeName,
+            String scanTime,
+            String ipAddress,
+            BigDecimal latitude,
+            BigDecimal longitude
+    ) {}
+}

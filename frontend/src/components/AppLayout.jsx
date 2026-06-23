@@ -4,7 +4,7 @@ import {
   DashboardOutlined, InboxOutlined, CoffeeOutlined, ExperimentOutlined,
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
   LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
-  FileTextOutlined, DatabaseOutlined,
+  FileTextOutlined, DatabaseOutlined, QrcodeOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -32,6 +32,9 @@ const items = [
     { key: '/stock-summary', icon: <DatabaseOutlined />, label: 'Chốt tồn & giá (tháng)' },
     { key: '/low-stock', icon: <WarningOutlined />, label: 'Cảnh báo tồn thấp' },
     { key: '/forecast', icon: <ThunderboltOutlined />, label: 'Dự báo tồn (AI)' },
+  ]},
+  { type: 'group', label: 'NHÂN SỰ', children: [
+    { key: '/attendance', icon: <QrcodeOutlined />, label: 'Chấm công QR' },
   ]},
 ]
 

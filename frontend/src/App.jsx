@@ -14,6 +14,8 @@ import LowStock from './pages/LowStock'
 import Forecast from './pages/Forecast'
 import InventoryBalance from './pages/InventoryBalance'
 import StockSummary from './pages/StockSummary'
+import AttendanceAdmin from './pages/AttendanceAdmin'
+import Checkin from './pages/Checkin'
 
 function Protected({ children }) {
   const { user, loading } = useAuth()
@@ -27,6 +29,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/checkin" element={<Checkin />} />
       <Route element={<Protected><AppLayout /></Protected>}>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<Dashboard />} />
@@ -40,6 +43,7 @@ export default function App() {
         <Route path="/inventory-balance" element={<InventoryBalance />} />
         <Route path="/stock-summary" element={<StockSummary />} />
         <Route path="/forecast" element={<Forecast />} />
+        <Route path="/attendance" element={<AttendanceAdmin />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
