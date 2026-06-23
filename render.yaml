@@ -30,6 +30,8 @@ services:
         value: "3"
       - key: JAVA_TOOL_OPTIONS
         value: -XX:MaxRAMPercentage=70.0
+      - key: TZ
+        value: Asia/Ho_Chi_Minh
       # Optional: free Google Gemini key for AI forecast advice (https://aistudio.google.com/apikey)
       - key: GEMINI_API_KEY
         sync: false
