@@ -15,18 +15,20 @@ services:
     healthCheckPath: /login
     envVars:
       - key: DB_URL
-        sync: false      # e.g. jdbc:mysql://sqlXXX.freedb.tech:3306/freedb_cafe?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+        value: jdbc:mysql://webcafe20260623-web-cafe.h.aivencloud.com:20339/defaultdb?sslMode=REQUIRED&serverTimezone=UTC
       - key: DB_USERNAME
-        sync: false
+        value: avnadmin
       - key: DB_PASSWORD
-        sync: false
+        sync: false      # paste the Aiven password in the Render dashboard (kept out of git)
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_USERNAME
         value: admin
       - key: ADMIN_PASSWORD
-        sync: false
+        sync: false      # set your admin login password
       - key: DB_POOL_SIZE
-        value: 3
+        value: "3"
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70.0
       - key: PORT
-        value: 8080
+        value: "8080"
