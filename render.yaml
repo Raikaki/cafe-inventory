@@ -1,0 +1,32 @@
+# Render Blueprint (https://render.com) — Docker web service.
+# Database: free MySQL on Aiven (https://aiven.io). Aiven requires SSL.
+#   DB_URL example:
+#   jdbc:mysql://mysql-xxxxx.aivencloud.com:PORT/defaultdb?sslMode=REQUIRED&serverTimezone=UTC
+#   DB_USERNAME=avnadmin   DB_PASSWORD=<from Aiven console>
+#
+# Deploy: push this repo to GitHub, then on Render -> "New +" -> "Blueprint",
+# select the repo. Fill the DB_URL / DB_USERNAME / DB_PASSWORD values.
+services:
+  - type: web
+    name: cafe-inventory
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /login
+    envVars:
+      - key: DB_URL
+        sync: false      # e.g. jdbc:mysql://sqlXXX.freedb.tech:3306/freedb_cafe?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE
+        value: 3
+      - key: PORT
+        value: 8080

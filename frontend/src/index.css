@@ -1,0 +1,19 @@
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: #f0f2f5;
+}
+.kpi-card .ant-statistic-title { color: rgba(255,255,255,.85); }
+.kpi-card .ant-statistic-content { color: #fff; font-weight: 700; }
+.brand-logo {
+  height: 56px; display: flex; align-items: center; gap: 10px;
+  color: #fff; padding: 0 20px; font-weight: 700; font-size: 17px;
+  letter-spacing: .3px; overflow: hidden; white-space: nowrap;
+}
+.login-bg {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #6b3e26 0%, #a0522d 50%, #c8964f 100%);
+}
+.site-content { padding: 24px; }
+.ant-layout-sider { box-shadow: 2px 0 8px rgba(0,0,0,.08); }

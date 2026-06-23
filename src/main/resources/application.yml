@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: cafe-inventory
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/cafe_inventory?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: false
+    show-sql: false
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  thymeleaf:
+    cache: ${THYMELEAF_CACHE:false}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+server:
+  port: ${PORT:8080}
+  error:
+    whitelabel:
+      enabled: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:Q2FmZUludmVudG9yeVN1cGVyU2VjcmV0S2V5Rm9ySldUU2lnbmluZzEyMzQ1Njc4OTA=}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin123}
+    full-name: System Administrator
+    email: ${ADMIN_EMAIL:admin@cafe.local}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    com.cafe.inventory: INFO
+    org.flywaydb: INFO

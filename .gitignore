@@ -1,0 +1,22 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.env
+*.log
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+# Generated SPA bundle (built into the jar during Docker build)
+src/main/resources/static/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS
+.DS_Store
+Thumbs.db
