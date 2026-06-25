@@ -15,6 +15,7 @@ import Forecast from './pages/Forecast'
 import InventoryBalance from './pages/InventoryBalance'
 import StockSummary from './pages/StockSummary'
 import Timesheet from './pages/Timesheet'
+import ProductSales from './pages/ProductSales'
 import AttendanceAdmin from './pages/AttendanceAdmin'
 import Checkin from './pages/Checkin'
 
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/inventory-balance" element={<InventoryBalance />} />
         <Route path="/stock-summary" element={<StockSummary />} />
         <Route path="/timesheet" element={<Timesheet />} />
+        <Route path="/product-sales" element={<ProductSales />} />
         <Route path="/forecast" element={<Forecast />} />
         <Route path="/attendance" element={<AttendanceAdmin />} />
       </Route>

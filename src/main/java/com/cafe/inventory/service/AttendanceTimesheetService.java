@@ -1,5 +1,6 @@
 package com.cafe.inventory.service;
 
+import com.cafe.inventory.dto.AttendanceDtos.TimesheetRow;
 import com.cafe.inventory.entity.AttendanceLog;
 import com.cafe.inventory.entity.AttendanceRecord;
 import com.cafe.inventory.exception.BusinessException;
@@ -49,6 +50,42 @@ public class AttendanceTimesheetService {
     public List<AttendanceRecord> getMonth(int year, int month) {
         YearMonth ym = YearMonth.of(year, month);
         return recordRepository.findByWorkDateBetweenOrderByEmployeeNameAscWorkDateAsc(ym.atDay(1), ym.atEndOfMonth());
+    }
+
+    /**
+     * Build the timesheet for a date range directly from the daily QR check-ins
+     * (min = giờ vào, max = giờ ra), supplemented by any imported records.
+     * QR data wins on conflict.
+     */
+    @Transactional(readOnly = true)
+    public List<TimesheetRow> getRange(LocalDate from, LocalDate to) {
+        Map<String, TimesheetRow> map = new LinkedHashMap<>();
+
+        // imported records first (base)
+        for (AttendanceRecord r : recordRepository.findByWorkDateBetweenOrderByEmployeeNameAscWorkDateAsc(from, to)) {
+            String key = r.getEmployeeName().trim().toLowerCase() + "|" + r.getWorkDate();
+            map.put(key, new TimesheetRow(r.getEmployeeName(), r.getWorkDate(), r.getCheckIn(), r.getCheckOut(), "IMPORT"));
+        }
+
+        // daily QR scans override (this is the live source of truth)
+        Map<String, List<AttendanceLog>> grouped = logRepository.findByQrDateBetween(from, to).stream()
+                .collect(Collectors.groupingBy(l -> l.getEmployeeName().trim().toLowerCase() + "|" + l.getQrDate()));
+        for (List<AttendanceLog> g : grouped.values()) {
+            g.sort(Comparator.comparing(AttendanceLog::getScanTime));
+            AttendanceLog first = g.get(0);
+            AttendanceLog last = g.get(g.size() - 1);
+            String key = first.getEmployeeName().trim().toLowerCase() + "|" + first.getQrDate();
+            map.put(key, new TimesheetRow(
+                    first.getEmployeeName(), first.getQrDate(),
+                    first.getScanTime().toLocalTime(),
+                    g.size() >= 2 ? last.getScanTime().toLocalTime() : null,
+                    "QR"));
+        }
+
+        List<TimesheetRow> rows = new ArrayList<>(map.values());
+        rows.sort(Comparator.comparing((TimesheetRow r) -> r.employeeName().toLowerCase())
+                .thenComparing(TimesheetRow::workDate));
+        return rows;
     }
 
     @Transactional

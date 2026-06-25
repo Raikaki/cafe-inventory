@@ -19,6 +19,11 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
            "FROM Sale s GROUP BY s.productId ORDER BY SUM(s.quantity) DESC")
     List<TopProduct> findTopProducts();
 
+    @Query("SELECT s.productId AS productId, SUM(s.quantity) AS qty " +
+           "FROM Sale s WHERE s.saleDate BETWEEN :from AND :to " +
+           "GROUP BY s.productId ORDER BY SUM(s.quantity) DESC")
+    List<TopProduct> sumByProductBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
+
     interface TopProduct {
         Long getProductId();
         java.math.BigDecimal getQty();

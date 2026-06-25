@@ -29,11 +29,12 @@ const menuItems = [
     { key: '/inventory-balance', icon: <FileTextOutlined />, label: 'Tổng hợp theo kỳ' },
     { key: '/stock-summary', icon: <DatabaseOutlined />, label: 'Chốt tồn & giá' },
     { key: '/low-stock', icon: <WarningOutlined />, label: 'Cảnh báo tồn thấp' },
+    { key: '/product-sales', icon: <ShoppingCartOutlined />, label: 'Thành phẩm đã bán' },
     { key: '/forecast', icon: <ThunderboltOutlined />, label: 'Dự báo tồn (AI)' },
   ]},
   { key: 'hr', icon: <TeamOutlined />, label: 'Nhân sự', children: [
     { key: '/attendance', icon: <QrcodeOutlined />, label: 'Chấm công QR' },
-    { key: '/timesheet', icon: <FileTextOutlined />, label: 'Bảng công tháng' },
+    { key: '/timesheet', icon: <FileTextOutlined />, label: 'Bảng chấm công' },
   ]},
 ]
 
@@ -41,7 +42,7 @@ const ROOT_KEYS = ['cat', 'ops', 'wh', 'hr']
 const PATH_PARENT = {
   '/materials': 'cat', '/products': 'cat', '/recipes': 'cat',
   '/goods-receipts': 'ops', '/sales': 'ops',
-  '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh',
+  '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh', '/product-sales': 'wh',
   '/attendance': 'hr', '/timesheet': 'hr',
 }
 const TITLES = {
@@ -49,7 +50,7 @@ const TITLES = {
   '/recipes': 'Công thức (BOM)', '/goods-receipts': 'Nhập kho', '/sales': 'Bán hàng',
   '/inventory': 'Sổ kho', '/inventory-balance': 'Tổng hợp tồn theo kỳ', '/stock-summary': 'Chốt tồn & giá theo tháng',
   '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
-  '/timesheet': 'Bảng công tháng',
+  '/timesheet': 'Bảng chấm công', '/product-sales': 'Thành phẩm đã bán',
 }
 
 const roleColor = (role) => ({

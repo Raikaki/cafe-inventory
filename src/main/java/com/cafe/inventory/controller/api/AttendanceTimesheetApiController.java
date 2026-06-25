@@ -1,14 +1,16 @@
 package com.cafe.inventory.controller.api;
 
-import com.cafe.inventory.entity.AttendanceRecord;
+import com.cafe.inventory.dto.AttendanceDtos.TimesheetRow;
 import com.cafe.inventory.service.AttendanceTimesheetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +22,12 @@ public class AttendanceTimesheetApiController {
 
     private final AttendanceTimesheetService timesheetService;
 
-    @Operation(summary = "Monthly timesheet records (employee x day)")
+    @Operation(summary = "Timesheet for a date range, built from daily QR check-ins + imports")
     @GetMapping
-    public List<AttendanceRecord> month(@RequestParam int year, @RequestParam int month) {
-        return timesheetService.getMonth(year, month);
+    public List<TimesheetRow> range(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return timesheetService.getRange(from, to);
     }
 
     @Operation(summary = "Import timesheet from Excel/CSV: Name | Date | CheckIn | CheckOut")
