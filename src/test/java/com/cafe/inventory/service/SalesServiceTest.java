@@ -33,6 +33,7 @@ class SalesServiceTest {
     @Mock MaterialRepository materialRepository;
     @Mock SaleRepository saleRepository;
     @Mock InventoryService inventoryService;
+    @Mock VoucherService voucherService;
     @InjectMocks SalesService salesService;
 
     @BeforeEach

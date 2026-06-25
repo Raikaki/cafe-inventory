@@ -1,10 +1,12 @@
 package com.cafe.inventory.service;
 
 import com.cafe.inventory.dto.GoodsReceiptDtos.*;
+import com.cafe.inventory.dto.VoucherDtos.VoucherRequest;
 import com.cafe.inventory.entity.GoodsReceipt;
 import com.cafe.inventory.entity.GoodsReceiptDetail;
 import com.cafe.inventory.exception.BusinessException;
 import com.cafe.inventory.repository.GoodsReceiptRepository;
+import com.cafe.inventory.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class GoodsReceiptService {
 
     private final GoodsReceiptRepository goodsReceiptRepository;
     private final InventoryService inventoryService;
+    private final VoucherService voucherService;
+    private final SupplierRepository supplierRepository;
 
     @Transactional
     public ReceiptResponse create(ReceiptRequest request, String user) {
@@ -58,6 +62,18 @@ public class GoodsReceiptService {
             BigDecimal unitPrice = line.quantity().compareTo(BigDecimal.ZERO) > 0
                     ? line.amount().divide(line.quantity(), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
             inventoryService.receive(line.materialId(), line.quantity(), unitPrice, gr.getReceiptNo(), user);
+        }
+
+        // auto-generate a goods-receipt voucher (Phiếu nhập kho)
+        try {
+            String supplierName = gr.getSupplierId() == null ? null
+                    : supplierRepository.findById(gr.getSupplierId()).map(s -> s.getSupplierName()).orElse(null);
+            voucherService.create(new VoucherRequest(
+                    "PHIEU_NHAP_KHO", gr.getReceiptDate(), null, null, supplierName, null,
+                    "Nhập kho NVL - phiếu " + gr.getReceiptNo(), null, null, total,
+                    null, "Tự động sinh từ phiếu nhập " + gr.getReceiptNo(), null), user);
+        } catch (Exception ex) {
+            log.warn("Auto voucher for receipt {} failed: {}", gr.getReceiptNo(), ex.getMessage());
         }
 
         log.info("Goods receipt {} created by {} with total {}", gr.getReceiptNo(), user, total);

@@ -1,6 +1,7 @@
 package com.cafe.inventory.service;
 
 import com.cafe.inventory.dto.SalesDtos.*;
+import com.cafe.inventory.dto.VoucherDtos.VoucherRequest;
 import com.cafe.inventory.entity.*;
 import com.cafe.inventory.exception.BusinessException;
 import com.cafe.inventory.repository.*;
@@ -28,6 +29,7 @@ public class SalesService {
     private final MaterialRepository materialRepository;
     private final SaleRepository saleRepository;
     private final InventoryService inventoryService;
+    private final VoucherService voucherService;
 
     @Transactional
     public SalesResult recordSales(SalesRequest request, String user) {
@@ -39,6 +41,7 @@ public class SalesService {
         List<String> warnings = new ArrayList<>();
         // aggregate required material qty across all sold products
         Map<Long, BigDecimal> required = new LinkedHashMap<>();
+        BigDecimal revenue = BigDecimal.ZERO;
 
         for (SaleLine line : request.lines()) {
             Product product = productRepository.findByProductCode(line.productCode())
@@ -51,6 +54,10 @@ public class SalesService {
             sale.setBatchNo(batchNo);
             sale.setCreatedBy(user);
             saleRepository.save(sale);
+
+            if (product.getSalePrice() != null) {
+                revenue = revenue.add(product.getSalePrice().multiply(line.quantity()));
+            }
 
             Recipe recipe = recipeRepository.findFirstByProductIdAndActiveFlagTrue(product.getId()).orElse(null);
             if (recipe == null || recipe.getDetails().isEmpty()) {
@@ -79,8 +86,18 @@ public class SalesService {
                     e.getValue(), before, after));
         }
 
-        log.info("Sales batch {} recorded by {}: {} lines, {} materials consumed",
-                batchNo, user, request.lines().size(), consumption.size());
+        // auto-generate a revenue voucher (Phiếu thu) for this sales batch
+        try {
+            voucherService.create(new VoucherRequest(
+                    "PHIEU_THU", request.saleDate(), null, null, null, null,
+                    "Doanh thu bán hàng - lô " + batchNo, null, null, revenue,
+                    null, "Tự động sinh từ bán hàng " + batchNo, null), user);
+        } catch (Exception ex) {
+            log.warn("Auto voucher for sales batch {} failed: {}", batchNo, ex.getMessage());
+        }
+
+        log.info("Sales batch {} recorded by {}: {} lines, {} materials consumed, revenue {}",
+                batchNo, user, request.lines().size(), consumption.size(), revenue);
         return new SalesResult(batchNo, request.saleDate(), request.lines().size(), consumption, warnings);
     }
 

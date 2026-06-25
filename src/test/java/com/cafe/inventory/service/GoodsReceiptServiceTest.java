@@ -5,6 +5,7 @@ import com.cafe.inventory.dto.GoodsReceiptDtos.ReceiptRequest;
 import com.cafe.inventory.dto.GoodsReceiptDtos.ReceiptResponse;
 import com.cafe.inventory.entity.GoodsReceipt;
 import com.cafe.inventory.repository.GoodsReceiptRepository;
+import com.cafe.inventory.repository.SupplierRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +30,8 @@ class GoodsReceiptServiceTest {
 
     @Mock GoodsReceiptRepository goodsReceiptRepository;
     @Mock InventoryService inventoryService;
+    @Mock VoucherService voucherService;
+    @Mock SupplierRepository supplierRepository;
     @InjectMocks GoodsReceiptService service;
 
     @BeforeEach
