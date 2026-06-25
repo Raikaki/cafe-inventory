@@ -64,7 +64,7 @@ function ManualReceipt({ materials, suppliers, onDone }) {
             <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" /></Form.Item></Col>
           <Col xs={24} md={8}><Form.Item name="supplierId" label="Nhà cung cấp">
             <Select allowClear placeholder="Chọn nhà cung cấp"
-                    options={suppliers.map((s) => ({ value: s.id, label: s.supplierName }))} /></Form.Item></Col>
+                    options={suppliers.filter((s) => s.activeFlag !== false).map((s) => ({ value: s.id, label: s.supplierName }))} /></Form.Item></Col>
           <Col xs={24} md={10}><Form.Item name="note" label="Ghi chú"><Input /></Form.Item></Col>
         </Row>
       </Form>

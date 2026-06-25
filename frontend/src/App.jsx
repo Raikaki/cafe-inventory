@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Materials from './pages/Materials'
 import Products from './pages/Products'
+import Suppliers from './pages/Suppliers'
 import Recipes from './pages/Recipes'
 import GoodsReceipt from './pages/GoodsReceipt'
 import Sales from './pages/Sales'
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/materials" element={<Materials />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/suppliers" element={<Suppliers />} />
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/goods-receipts" element={<GoodsReceipt />} />
         <Route path="/sales" element={<Sales />} />
