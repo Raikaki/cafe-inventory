@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Year;
 
 @Slf4j
@@ -36,11 +37,14 @@ public class GoodsReceiptService {
 
         BigDecimal total = BigDecimal.ZERO;
         for (ReceiptLine line : request.lines()) {
-            BigDecimal amount = line.quantity().multiply(line.unitPrice());
+            BigDecimal amount = line.amount();
+            // unit price derived from amount / quantity
+            BigDecimal unitPrice = line.quantity().compareTo(BigDecimal.ZERO) > 0
+                    ? amount.divide(line.quantity(), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
             GoodsReceiptDetail d = new GoodsReceiptDetail();
             d.setMaterialId(line.materialId());
             d.setQuantity(line.quantity());
-            d.setUnitPrice(line.unitPrice());
+            d.setUnitPrice(unitPrice);
             d.setAmount(amount);
             gr.addDetail(d);
             total = total.add(amount);
@@ -48,10 +52,12 @@ public class GoodsReceiptService {
         gr.setTotalAmount(total);
         goodsReceiptRepository.save(gr);
 
-        // Apply to inventory (increase qty + weighted average cost)
+        // Apply to inventory: increase qty + record line unit cost on the ledger.
+        // Average cost is NOT updated here — it is computed at monthly close.
         for (ReceiptLine line : request.lines()) {
-            inventoryService.receive(line.materialId(), line.quantity(), line.unitPrice(),
-                    gr.getReceiptNo(), user);
+            BigDecimal unitPrice = line.quantity().compareTo(BigDecimal.ZERO) > 0
+                    ? line.amount().divide(line.quantity(), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
+            inventoryService.receive(line.materialId(), line.quantity(), unitPrice, gr.getReceiptNo(), user);
         }
 
         log.info("Goods receipt {} created by {} with total {}", gr.getReceiptNo(), user, total);

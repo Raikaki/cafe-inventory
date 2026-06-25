@@ -8,10 +8,11 @@ import java.util.List;
 
 public class GoodsReceiptDtos {
 
+    /** User enters quantity + amount (thành tiền); unit price = amount / quantity. */
     public record ReceiptLine(
             @NotNull Long materialId,
             @NotNull BigDecimal quantity,
-            @NotNull BigDecimal unitPrice
+            @NotNull BigDecimal amount
     ) {}
 
     public record ReceiptRequest(

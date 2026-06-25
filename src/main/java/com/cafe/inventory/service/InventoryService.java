@@ -27,20 +27,17 @@ public class InventoryService {
     private final MaterialRepository materialRepository;
     private final InventoryTransactionRepository txnRepository;
 
-    /** Increase stock (goods receipt) and recompute weighted average cost. */
+    /**
+     * Increase stock (goods receipt). Records the line unit cost on the ledger but
+     * does NOT update the material average cost — that is computed at monthly close
+     * (periodic weighted average) in {@link StockSummaryService}.
+     */
     @Transactional
     public InventoryTransaction receive(Long materialId, BigDecimal qty, BigDecimal unitCost,
                                         String referenceNo, String user) {
         Material m = getMaterial(materialId);
         BigDecimal before = m.getCurrentQty();
         BigDecimal after = before.add(qty);
-
-        // weighted average: (before*avg + qty*unitCost) / after
-        if (after.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal totalValue = before.multiply(m.getAverageCost())
-                    .add(qty.multiply(unitCost));
-            m.setAverageCost(totalValue.divide(after, 2, RoundingMode.HALF_UP));
-        }
         m.setCurrentQty(after);
         materialRepository.save(m);
 

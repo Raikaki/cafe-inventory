@@ -12,14 +12,14 @@ const { Title, Text } = Typography
 const { Dragger } = Upload
 
 function ManualReceipt({ materials, suppliers, onDone }) {
-  const [lines, setLines] = useState([{ key: 1, materialId: null, quantity: 0, unitPrice: 0 }])
+  const [lines, setLines] = useState([{ key: 1, materialId: null, quantity: 0, amount: 0 }])
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
 
-  const addLine = () => setLines((p) => [...p, { key: Date.now(), materialId: null, quantity: 0, unitPrice: 0 }])
+  const addLine = () => setLines((p) => [...p, { key: Date.now(), materialId: null, quantity: 0, amount: 0 }])
   const removeLine = (key) => setLines((p) => p.filter((l) => l.key !== key))
   const updateLine = (key, f, v) => setLines((p) => p.map((l) => l.key === key ? { ...l, [f]: v } : l))
-  const total = lines.reduce((s, l) => s + Number(l.quantity || 0) * Number(l.unitPrice || 0), 0)
+  const total = lines.reduce((s, l) => s + Number(l.amount || 0), 0)
 
   const submit = async () => {
     const v = await form.validateFields()
@@ -28,7 +28,7 @@ function ManualReceipt({ materials, suppliers, onDone }) {
       supplierId: v.supplierId || null,
       note: v.note || null,
       lines: lines.filter((l) => l.materialId && Number(l.quantity) > 0)
-        .map((l) => ({ materialId: l.materialId, quantity: l.quantity, unitPrice: l.unitPrice })),
+        .map((l) => ({ materialId: l.materialId, quantity: l.quantity, amount: l.amount })),
     }
     if (payload.lines.length === 0) { message.warning('Thêm ít nhất 1 dòng nguyên liệu'); return }
     setSaving(true)
@@ -43,13 +43,16 @@ function ManualReceipt({ materials, suppliers, onDone }) {
               onChange={(val) => updateLine(r.key, 'materialId', val)}
               options={materials.map((m) => ({ value: m.id, label: `${m.materialName} (${m.unit})` }))} />
     )},
-    { title: 'Số lượng', dataIndex: 'quantity', width: 150, render: (v, r) => (
+    { title: 'Số lượng', dataIndex: 'quantity', width: 140, render: (v, r) => (
       <InputNumber style={{ width: '100%' }} min={0} value={v} onChange={(val) => updateLine(r.key, 'quantity', val)} />
     )},
-    { title: 'Đơn giá', dataIndex: 'unitPrice', width: 150, render: (v, r) => (
-      <InputNumber style={{ width: '100%' }} min={0} value={v} onChange={(val) => updateLine(r.key, 'unitPrice', val)} />
+    { title: 'Thành tiền (đ)', dataIndex: 'amount', width: 160, render: (v, r) => (
+      <InputNumber style={{ width: '100%' }} min={0} value={v} onChange={(val) => updateLine(r.key, 'amount', val)}
+                   formatter={(x) => `${x}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                   parser={(x) => `${x}`.replace(/,/g, '')} />
     )},
-    { title: 'Thành tiền', width: 140, align: 'right', render: (_, r) => <b>{fmt(Number(r.quantity || 0) * Number(r.unitPrice || 0))}</b> },
+    { title: 'Đơn giá (tự tính)', width: 140, align: 'right',
+      render: (_, r) => <span style={{ color: '#1677ff' }}>{Number(r.quantity) > 0 ? fmt(Number(r.amount || 0) / Number(r.quantity)) : '—'}</span> },
     { title: '', width: 50, render: (_, r) => <Button size="small" danger icon={<DeleteOutlined />} onClick={() => removeLine(r.key)} /> },
   ]
 
@@ -68,9 +71,9 @@ function ManualReceipt({ materials, suppliers, onDone }) {
       <Table rowKey="key" dataSource={lines} columns={columns} pagination={false} size="small"
              summary={() => (
                <Table.Summary.Row>
-                 <Table.Summary.Cell colSpan={3} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
+                 <Table.Summary.Cell colSpan={2} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
                  <Table.Summary.Cell index={1} align="right"><b style={{ color: '#a0522d' }}>{fmt(total)} đ</b></Table.Summary.Cell>
-                 <Table.Summary.Cell index={2} />
+                 <Table.Summary.Cell colSpan={2} index={2} />
                </Table.Summary.Row>
              )} />
       <Space style={{ marginTop: 16 }}>
@@ -97,7 +100,7 @@ function ImportReceipt({ onDone }) {
   return (
     <>
       <Alert style={{ marginBottom: 16 }} type="info" showIcon message="Định dạng file"
-             description={<span>Cột: <Text code>Material Code</Text> | <Text code>Quantity</Text> | <Text code>Unit Price</Text>. Ví dụ: <Text code>MAT001, 5000, 0.3</Text>. Hỗ trợ .xlsx và .csv.</span>} />
+             description={<span>Cột: <Text code>Material Code</Text> | <Text code>Quantity</Text> | <Text code>Thành tiền</Text>. Ví dụ: <Text code>MAT001, 5000, 1500000</Text> (đơn giá tự tính = tiền ÷ SL). Hỗ trợ .xlsx và .csv.</span>} />
       <Dragger accept=".xlsx,.csv" customRequest={customRequest} showUploadList={false} disabled={uploading}>
         <p className="ant-upload-drag-icon"><InboxOutlined /></p>
         <p className="ant-upload-text">Kéo thả hoặc bấm để chọn file Excel/CSV</p>

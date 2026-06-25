@@ -38,12 +38,23 @@ public class StockSummaryService {
         return summaryRepository.findByPeriodYearAndPeriodMonthOrderByMaterialCode(year, month);
     }
 
-    /** Recompute the month from the ledger and (re)store it into the summary table. */
+    /**
+     * Close the month: recompute from the ledger, derive the PERIODIC WEIGHTED
+     * AVERAGE cost, update each material's average cost, and store the summary.
+     *
+     *   avgCost = (openingValue + receiptAmountInMonth) / (openingQty + receiptQtyInMonth)
+     *   openingValue = previous month's closing value (or openingQty × current avg if none)
+     */
     @Transactional
     public List<StockPeriodSummary> aggregate(int year, int month, String user) {
         YearMonth ym = YearMonth.of(year, month);
         LocalDate from = ym.atDay(1);
         LocalDate to = ym.atEndOfMonth();
+
+        YearMonth prevYm = ym.minusMonths(1);
+        Map<Long, StockPeriodSummary> prev = summaryRepository
+                .findByPeriodYearAndPeriodMonthOrderByMaterialCode(prevYm.getYear(), prevYm.getMonthValue())
+                .stream().collect(Collectors.toMap(StockPeriodSummary::getMaterialId, s -> s, (a, b) -> a));
 
         Map<Long, List<InventoryTransaction>> byMaterial = txnRepository.findAllByOrderByTxnDateAsc()
                 .stream().collect(Collectors.groupingBy(InventoryTransaction::getMaterialId));
@@ -56,6 +67,7 @@ public class StockSummaryService {
 
             BigDecimal opening = BigDecimal.ZERO, closing = BigDecimal.ZERO;
             BigDecimal receipt = BigDecimal.ZERO, consumption = BigDecimal.ZERO, adjustment = BigDecimal.ZERO;
+            BigDecimal receiptAmount = BigDecimal.ZERO; // tổng tiền nhập trong tháng
 
             for (InventoryTransaction t : txns) {
                 LocalDate d = t.getTxnDate().toLocalDate();
@@ -64,7 +76,11 @@ public class StockSummaryService {
                 if (!d.isAfter(to)) closing = closing.add(q);
                 if (!d.isBefore(from) && !d.isAfter(to)) {
                     switch (t.getTxnType()) {
-                        case RECEIPT -> receipt = receipt.add(q);
+                        case RECEIPT -> {
+                            receipt = receipt.add(q);
+                            BigDecimal uc = t.getUnitCost() == null ? BigDecimal.ZERO : t.getUnitCost();
+                            receiptAmount = receiptAmount.add(q.multiply(uc));
+                        }
                         case SALE_CONSUMPTION -> consumption = consumption.add(q.abs());
                         case ADJUSTMENT -> adjustment = adjustment.add(q);
                         default -> { }
@@ -72,8 +88,22 @@ public class StockSummaryService {
                 }
             }
 
-            BigDecimal unitCost = m.getAverageCost() == null ? BigDecimal.ZERO : m.getAverageCost();
-            BigDecimal closingValue = closing.multiply(unitCost).setScale(2, RoundingMode.HALF_UP);
+            // opening value: prefer previous month's closing value
+            BigDecimal prevAvg = m.getAverageCost() == null ? BigDecimal.ZERO : m.getAverageCost();
+            StockPeriodSummary p = prev.get(m.getId());
+            BigDecimal openingValue = (p != null) ? p.getClosingValue() : opening.multiply(prevAvg);
+
+            // periodic weighted average cost
+            BigDecimal denom = opening.add(receipt);
+            BigDecimal avgCost = denom.compareTo(BigDecimal.ZERO) > 0
+                    ? openingValue.add(receiptAmount).divide(denom, 2, RoundingMode.HALF_UP)
+                    : prevAvg;
+
+            BigDecimal closingValue = closing.multiply(avgCost).setScale(2, RoundingMode.HALF_UP);
+
+            // update the material's average cost at close
+            m.setAverageCost(avgCost);
+            materialRepository.save(m);
 
             StockPeriodSummary s = new StockPeriodSummary();
             s.setPeriodYear(year);
@@ -87,7 +117,7 @@ public class StockSummaryService {
             s.setConsumptionQty(consumption);
             s.setAdjustmentQty(adjustment);
             s.setClosingQty(closing);
-            s.setUnitCost(unitCost);
+            s.setUnitCost(avgCost);
             s.setClosingValue(closingValue);
             s.setCreatedBy(user);
             rows.add(s);

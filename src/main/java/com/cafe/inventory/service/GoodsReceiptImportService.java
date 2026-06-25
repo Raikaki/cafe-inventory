@@ -56,9 +56,10 @@ public class GoodsReceiptImportService {
                     .orElseThrow(() -> new BusinessException("Material code not found: " + code));
             try {
                 BigDecimal qty = new BigDecimal(r[1].trim());
-                BigDecimal price = r.length > 2 && !r[2].isBlank() ? new BigDecimal(r[2].trim()) : BigDecimal.ZERO;
+                // 3rd column = amount (thành tiền); unit price is derived later
+                BigDecimal amount = r.length > 2 && !r[2].isBlank() ? new BigDecimal(r[2].trim()) : BigDecimal.ZERO;
                 if (qty.compareTo(BigDecimal.ZERO) > 0) {
-                    lines.add(new ReceiptLine(m.getId(), qty, price));
+                    lines.add(new ReceiptLine(m.getId(), qty, amount));
                 }
             } catch (NumberFormatException ex) {
                 throw new BusinessException("Invalid number in row for material " + code);
