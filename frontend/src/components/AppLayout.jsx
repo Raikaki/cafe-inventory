@@ -5,6 +5,7 @@ import {
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
   LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
   FileTextOutlined, DatabaseOutlined, QrcodeOutlined, AppstoreOutlined, TeamOutlined, ShopOutlined,
+  SnippetsOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -37,14 +38,17 @@ const menuItems = [
     { key: '/attendance', icon: <QrcodeOutlined />, label: 'Chấm công QR' },
     { key: '/timesheet', icon: <FileTextOutlined />, label: 'Bảng chấm công' },
   ]},
+  { key: 'acc', icon: <SnippetsOutlined />, label: 'Kế toán', children: [
+    { key: '/vouchers', icon: <FileTextOutlined />, label: 'Chứng từ' },
+  ]},
 ]
 
-const ROOT_KEYS = ['cat', 'ops', 'wh', 'hr']
+const ROOT_KEYS = ['cat', 'ops', 'wh', 'hr', 'acc']
 const PATH_PARENT = {
   '/materials': 'cat', '/products': 'cat', '/recipes': 'cat', '/suppliers': 'cat',
   '/goods-receipts': 'ops', '/sales': 'ops',
   '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh', '/product-sales': 'wh',
-  '/attendance': 'hr', '/timesheet': 'hr',
+  '/attendance': 'hr', '/timesheet': 'hr', '/vouchers': 'acc',
 }
 const TITLES = {
   '/dashboard': 'Dashboard', '/materials': 'Nguyên vật liệu', '/products': 'Sản phẩm',
@@ -52,6 +56,7 @@ const TITLES = {
   '/inventory': 'Sổ kho', '/inventory-balance': 'Tổng hợp tồn theo kỳ', '/stock-summary': 'Chốt tồn & giá theo tháng',
   '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
   '/timesheet': 'Bảng chấm công', '/product-sales': 'Thành phẩm đã bán',
+  '/vouchers': 'Chứng từ kế toán',
 }
 
 const roleColor = (role) => ({
