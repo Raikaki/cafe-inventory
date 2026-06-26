@@ -44,7 +44,7 @@ export default function Checkin() {
     <div className="login-bg" style={{ padding: 16 }}>
       <Card style={{ width: 400, maxWidth: '100%', boxShadow: '0 10px 40px rgba(0,0,0,.25)' }} bordered={false}>
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <CoffeeOutlined style={{ fontSize: 40, color: '#a0522d' }} />
+          <CoffeeOutlined style={{ fontSize: 40, color: '#7C3AED' }} />
           <Title level={3} style={{ marginBottom: 0, marginTop: 8 }}>Chấm công</Title>
           <Text type="secondary">Cafe Inventory</Text>
         </div>

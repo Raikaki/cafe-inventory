@@ -71,7 +71,7 @@ export default function StockSummary() {
     { title: 'Tồn cuối', dataIndex: 'closingQty', align: 'right', width: 110, render: (v) => <b>{fmt(v)}</b> },
     { title: 'Đơn giá', dataIndex: 'unitCost', align: 'right', width: 110, render: fmt },
     { title: 'Giá trị tồn cuối', dataIndex: 'closingValue', align: 'right', width: 140,
-      render: (v) => <b style={{ color: '#a0522d' }}>{fmt(v)} đ</b> },
+      render: (v) => <b style={{ color: '#7C3AED' }}>{fmt(v)} đ</b> },
   ]
 
   return (
@@ -103,7 +103,7 @@ export default function StockSummary() {
       {rows.length > 0 && (
         <Row gutter={16} style={{ marginBottom: 16 }}>
           <Statistic title="Tổng giá trị tồn kho cuối kỳ" value={Math.round(totalValue)}
-                     suffix="đ" valueStyle={{ color: '#a0522d' }} style={{ paddingLeft: 8 }} />
+                     suffix="đ" valueStyle={{ color: '#7C3AED' }} style={{ paddingLeft: 8 }} />
         </Row>
       )}
 
@@ -115,7 +115,7 @@ export default function StockSummary() {
                  <Table.Summary.Row>
                    <Table.Summary.Cell index={0} colSpan={9}><b>Tổng giá trị tồn cuối kỳ</b></Table.Summary.Cell>
                    <Table.Summary.Cell index={1} align="right">
-                     <b style={{ color: '#a0522d' }}>{fmt(totalValue)} đ</b>
+                     <b style={{ color: '#7C3AED' }}>{fmt(totalValue)} đ</b>
                    </Table.Summary.Cell>
                  </Table.Summary.Row>
                )} />

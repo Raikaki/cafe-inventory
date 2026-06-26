@@ -100,7 +100,7 @@ function ManualReceipt({ materials, suppliers, onDone }) {
              summary={() => (
                <Table.Summary.Row>
                  <Table.Summary.Cell colSpan={3} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
-                 <Table.Summary.Cell index={1} align="right"><b style={{ color: '#a0522d' }}>{fmt(total)} đ</b></Table.Summary.Cell>
+                 <Table.Summary.Cell index={1} align="right"><b style={{ color: '#7C3AED' }}>{fmt(total)} đ</b></Table.Summary.Cell>
                  <Table.Summary.Cell colSpan={4} index={2} />
                </Table.Summary.Row>
              )} />

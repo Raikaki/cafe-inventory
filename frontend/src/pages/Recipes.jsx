@@ -89,7 +89,7 @@ export default function Recipes() {
           {!recipe ? <Card><Empty description="Chọn một sản phẩm để định nghĩa công thức" /></Card> : (
             <Card
               title={`Công thức: ${recipe.productName}`}
-              extra={<Statistic title="Giá vốn / ly" value={fmt(totalCost)} suffix="đ" valueStyle={{ fontSize: 18, color: '#a0522d' }} />}
+              extra={<Statistic title="Giá vốn / ly" value={fmt(totalCost)} suffix="đ" valueStyle={{ fontSize: 18, color: '#7C3AED' }} />}
             >
               <Table rowKey="key" dataSource={lines} columns={columns} pagination={false} size="small"
                      locale={{ emptyText: 'Chưa có nguyên liệu' }} />

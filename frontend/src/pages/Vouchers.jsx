@@ -110,7 +110,7 @@ export default function Vouchers() {
     { title: 'Đối tác', dataIndex: 'partnerName' },
     { title: 'Nội dung', dataIndex: 'content', ellipsis: true },
     { title: 'Số tiền', dataIndex: 'amount', align: 'right', width: 150,
-      render: (v) => <b style={{ color: '#a0522d' }}>{fmt(v)} đ</b> },
+      render: (v) => <b style={{ color: '#7C3AED' }}>{fmt(v)} đ</b> },
     { title: 'Người lập', dataIndex: 'creatorName', width: 140 },
     { title: '', width: 60, fixed: 'right', render: (_, r) => (
       <Button size="small" icon={<EyeOutlined />} onClick={() => setDetail(r)} />
@@ -192,7 +192,7 @@ export default function Vouchers() {
             <Descriptions.Item label="Người/ĐV nộp/nhận">{detail.partnerName || '—'}</Descriptions.Item>
             <Descriptions.Item label="Nội dung">{detail.content || '—'}</Descriptions.Item>
             <Descriptions.Item label="Số lượng / ĐV">{detail.quantity ? `${fmt(detail.quantity)} ${detail.unit || ''}` : '—'}</Descriptions.Item>
-            <Descriptions.Item label="Số tiền"><b style={{ color: '#a0522d' }}>{fmt(detail.amount)} đ</b></Descriptions.Item>
+            <Descriptions.Item label="Số tiền"><b style={{ color: '#7C3AED' }}>{fmt(detail.amount)} đ</b></Descriptions.Item>
             <Descriptions.Item label="Bằng chữ"><i>{detail.amountInWords}</i></Descriptions.Item>
             <Descriptions.Item label="Người duyệt">{detail.approverName || '—'}</Descriptions.Item>
             <Descriptions.Item label="Ghi chú">{detail.note || '—'}</Descriptions.Item>

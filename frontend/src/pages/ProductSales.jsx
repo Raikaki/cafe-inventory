@@ -32,7 +32,7 @@ export default function ProductSales() {
     { title: 'Số lượng bán', dataIndex: 'quantitySold', align: 'right', width: 140,
       render: (v) => <b>{fmt(v)}</b> },
     { title: 'Doanh thu', dataIndex: 'revenue', align: 'right', width: 160,
-      render: (v) => <b style={{ color: '#a0522d' }}>{fmt(v)} đ</b> },
+      render: (v) => <b style={{ color: '#7C3AED' }}>{fmt(v)} đ</b> },
   ]
 
   const chartData = (data?.rows || []).slice(0, 8).map((r) => ({ name: r.productName, qty: Number(r.quantitySold) }))
@@ -60,7 +60,7 @@ export default function ProductSales() {
             <Card><Statistic title="Tổng số lượng bán" value={fmt(data.totalQuantity)} /></Card>
           </Col>
           <Col xs={12} md={8}>
-            <Card><Statistic title="Tổng doanh thu" value={fmt(data.totalRevenue)} suffix="đ" valueStyle={{ color: '#a0522d' }} /></Card>
+            <Card><Statistic title="Tổng doanh thu" value={fmt(data.totalRevenue)} suffix="đ" valueStyle={{ color: '#7C3AED' }} /></Card>
           </Col>
         </Row>
       )}
@@ -73,7 +73,7 @@ export default function ProductSales() {
               <XAxis dataKey="name" fontSize={12} />
               <YAxis allowDecimals={false} fontSize={12} />
               <Tooltip />
-              <Bar dataKey="qty" name="Số lượng bán" fill="#a0522d" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="qty" name="Số lượng bán" fill="#7C3AED" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -87,7 +87,7 @@ export default function ProductSales() {
                  <Table.Summary.Row>
                    <Table.Summary.Cell index={0} colSpan={3}><b>Tổng cộng</b></Table.Summary.Cell>
                    <Table.Summary.Cell index={1} align="right"><b>{fmt(data.totalQuantity)}</b></Table.Summary.Cell>
-                   <Table.Summary.Cell index={2} align="right"><b style={{ color: '#a0522d' }}>{fmt(data.totalRevenue)} đ</b></Table.Summary.Cell>
+                   <Table.Summary.Cell index={2} align="right"><b style={{ color: '#7C3AED' }}>{fmt(data.totalRevenue)} đ</b></Table.Summary.Cell>
                  </Table.Summary.Row>
                ) : null} />
       </Card>

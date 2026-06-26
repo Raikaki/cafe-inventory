@@ -36,7 +36,7 @@ export default function Login() {
           <div style={{
             width: 64, height: 64, margin: '0 auto 14px', borderRadius: 18,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg,#d6a861,#a0522d)', boxShadow: '0 10px 24px rgba(160,82,45,.4)',
+            background: 'linear-gradient(135deg,#A78BFA,#7C3AED)', boxShadow: '0 10px 24px rgba(160,82,45,.4)',
           }}>
             <CoffeeOutlined style={{ fontSize: 32, color: '#fff' }} />
           </div>

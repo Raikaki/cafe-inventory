@@ -64,7 +64,7 @@ export default function Dashboard() {
                   <XAxis dataKey="name" fontSize={12} />
                   <YAxis allowDecimals={false} fontSize={12} />
                   <Tooltip />
-                  <Bar dataKey="qty" name="Số lượng bán" fill="#a0522d" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="qty" name="Số lượng bán" fill="#7C3AED" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

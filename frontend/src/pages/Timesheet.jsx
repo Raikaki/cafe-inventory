@@ -108,7 +108,7 @@ export default function Timesheet() {
           <div style={{ fontSize: 11, lineHeight: 1.25 }}>
             <div style={{ color: '#389e0d' }}>{hhmm(rec.checkIn) || '--'}</div>
             <div style={{ color: '#1677ff' }}>{hhmm(rec.checkOut) || '--'}</div>
-            {h && <div style={{ color: '#a0522d', fontWeight: 600 }}>{h}h</div>}
+            {h && <div style={{ color: '#7C3AED', fontWeight: 600 }}>{h}h</div>}
           </div>
         )
       },
@@ -119,7 +119,7 @@ export default function Timesheet() {
     { title: 'Nhân viên', dataIndex: 'employeeName', fixed: 'left', width: 160, render: (v) => <b>{v}</b> },
     ...dayColumns,
     { title: 'Tổng giờ', dataIndex: 'totalHours', fixed: 'right', width: 90, align: 'right',
-      render: (v) => <b style={{ color: '#a0522d' }}>{v} h</b> },
+      render: (v) => <b style={{ color: '#7C3AED' }}>{v} h</b> },
   ]
 
   return (
@@ -144,7 +144,7 @@ export default function Timesheet() {
         </Space>
         <Alert style={{ marginTop: 12 }} type="info" showIcon
                message="Dữ liệu tự lấy từ chấm công QR hàng ngày trong khoảng đã chọn"
-               description={<span>Có thể bổ sung bằng file Excel/CSV (4 cột: <Text code>Tên nhân viên | Ngày | Giờ vào | Giờ ra</Text>). Mỗi ô: <span style={{ color: '#389e0d' }}>vào</span> / <span style={{ color: '#1677ff' }}>ra</span> / <span style={{ color: '#a0522d' }}>số giờ</span>.</span>} />
+               description={<span>Có thể bổ sung bằng file Excel/CSV (4 cột: <Text code>Tên nhân viên | Ngày | Giờ vào | Giờ ra</Text>). Mỗi ô: <span style={{ color: '#389e0d' }}>vào</span> / <span style={{ color: '#1677ff' }}>ra</span> / <span style={{ color: '#7C3AED' }}>số giờ</span>.</span>} />
       </Card>
 
       <Card bodyStyle={{ padding: 0 }}>
