@@ -26,6 +26,12 @@ public class Material extends Auditable {
     @Column(name = "unit", nullable = false, length = 20)
     private String unit;
 
+    @Column(name = "purchase_unit", length = 20)
+    private String purchaseUnit;
+
+    @Column(name = "conversion_factor", precision = 18, scale = 4)
+    private BigDecimal conversionFactor = BigDecimal.ONE;
+
     @Column(name = "current_qty", nullable = false, precision = 18, scale = 3)
     private BigDecimal currentQty = BigDecimal.ZERO;
 

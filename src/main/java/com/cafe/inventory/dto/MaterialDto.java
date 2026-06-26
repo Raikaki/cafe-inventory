@@ -11,6 +11,8 @@ public record MaterialDto(
         @NotBlank String materialCode,
         @NotBlank String materialName,
         @NotBlank String unit,
+        String purchaseUnit,
+        BigDecimal conversionFactor,
         @NotNull BigDecimal currentQty,
         @NotNull BigDecimal minimumQty,
         @NotNull BigDecimal maximumQty,
@@ -20,6 +22,7 @@ public record MaterialDto(
     public static MaterialDto from(Material m) {
         return new MaterialDto(
                 m.getId(), m.getMaterialCode(), m.getMaterialName(), m.getUnit(),
+                m.getPurchaseUnit(), m.getConversionFactor(),
                 m.getCurrentQty(), m.getMinimumQty(), m.getMaximumQty(),
                 m.getAverageCost(), m.getActiveFlag()
         );

@@ -26,6 +26,7 @@ const menuItems = [
     { key: '/goods-receipts', icon: <ImportOutlined />, label: 'Nhập kho' },
     { key: '/sales', icon: <ShoppingCartOutlined />, label: 'Bán hàng' },
     { key: '/stock-count', icon: <AuditOutlined />, label: 'Kiểm kê' },
+    { key: '/batches', icon: <ExperimentOutlined />, label: 'Lô & Hạn sử dụng' },
   ]},
   { key: 'wh', icon: <DatabaseOutlined />, label: 'Kho & Báo cáo', children: [
     { key: '/inventory', icon: <SwapOutlined />, label: 'Sổ kho' },
@@ -48,13 +49,13 @@ const menuItems = [
 const ROOT_KEYS = ['cat', 'ops', 'wh', 'hr', 'acc']
 const PATH_PARENT = {
   '/materials': 'cat', '/products': 'cat', '/recipes': 'cat', '/suppliers': 'cat',
-  '/goods-receipts': 'ops', '/sales': 'ops', '/stock-count': 'ops',
+  '/goods-receipts': 'ops', '/sales': 'ops', '/stock-count': 'ops', '/batches': 'ops',
   '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh', '/product-sales': 'wh', '/price-comparison': 'wh',
   '/attendance': 'hr', '/timesheet': 'hr', '/vouchers': 'acc',
 }
 const TITLES = {
   '/dashboard': 'Dashboard', '/materials': 'Nguyên vật liệu', '/products': 'Sản phẩm',
-  '/recipes': 'Công thức (BOM)', '/suppliers': 'Nhà cung cấp', '/goods-receipts': 'Nhập kho', '/sales': 'Bán hàng', '/stock-count': 'Kiểm kê kho',
+  '/recipes': 'Công thức (BOM)', '/suppliers': 'Nhà cung cấp', '/goods-receipts': 'Nhập kho', '/sales': 'Bán hàng', '/stock-count': 'Kiểm kê kho', '/batches': 'Lô & Hạn sử dụng',
   '/inventory': 'Sổ kho', '/inventory-balance': 'Tổng hợp tồn theo kỳ', '/stock-summary': 'Chốt tồn & giá theo tháng',
   '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
   '/timesheet': 'Bảng chấm công', '/product-sales': 'Thành phẩm đã bán',

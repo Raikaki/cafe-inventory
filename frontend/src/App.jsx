@@ -20,6 +20,7 @@ import ProductSales from './pages/ProductSales'
 import Vouchers from './pages/Vouchers'
 import PriceComparison from './pages/PriceComparison'
 import StockCount from './pages/StockCount'
+import Batches from './pages/Batches'
 import AttendanceAdmin from './pages/AttendanceAdmin'
 import Checkin from './pages/Checkin'
 
@@ -54,6 +55,7 @@ export default function App() {
         <Route path="/vouchers" element={<Vouchers />} />
         <Route path="/price-comparison" element={<PriceComparison />} />
         <Route path="/stock-count" element={<StockCount />} />
+        <Route path="/batches" element={<Batches />} />
         <Route path="/forecast" element={<Forecast />} />
         <Route path="/attendance" element={<AttendanceAdmin />} />
       </Route>

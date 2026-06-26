@@ -45,6 +45,8 @@ public class MaterialService {
         m.setMaterialCode(dto.materialCode());
         m.setMaterialName(dto.materialName());
         m.setUnit(dto.unit());
+        m.setPurchaseUnit(dto.purchaseUnit());
+        m.setConversionFactor(dto.conversionFactor() == null ? BigDecimal.ONE : dto.conversionFactor());
         m.setMinimumQty(nz(dto.minimumQty()));
         m.setMaximumQty(nz(dto.maximumQty()));
         m.setAverageCost(nz(dto.averageCost()));
@@ -71,6 +73,8 @@ public class MaterialService {
         m.setMaterialCode(dto.materialCode());
         m.setMaterialName(dto.materialName());
         m.setUnit(dto.unit());
+        m.setPurchaseUnit(dto.purchaseUnit());
+        m.setConversionFactor(dto.conversionFactor() == null ? BigDecimal.ONE : dto.conversionFactor());
         m.setMinimumQty(nz(dto.minimumQty()));
         m.setMaximumQty(nz(dto.maximumQty()));
         m.setAverageCost(nz(dto.averageCost()));

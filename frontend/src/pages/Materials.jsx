@@ -111,6 +111,12 @@ export default function Materials() {
           </Row>
           <Form.Item name="materialName" label="Tên" rules={[{ required: true }]}><Input /></Form.Item>
           <Row gutter={12}>
+            <Col span={12}><Form.Item name="purchaseUnit" label="Đơn vị mua" extra="vd. mua theo kg/thùng">
+              <Input placeholder="kg, thùng..." /></Form.Item></Col>
+            <Col span={12}><Form.Item name="conversionFactor" label="Quy đổi (1 ĐV mua = ? ĐVT)" extra="vd. 1 kg = 1000 g">
+              <InputNumber style={{ width: '100%' }} min={0} placeholder="1" /></Form.Item></Col>
+          </Row>
+          <Row gutter={12}>
             <Col span={12}>
               <Form.Item name="currentQty" label={editing ? 'Tồn kho hiện tại' : 'Tồn kho đầu kỳ'}
                          extra={editing

@@ -12,14 +12,24 @@ const { Title, Text } = Typography
 const { Dragger } = Upload
 
 function ManualReceipt({ materials, suppliers, onDone }) {
-  const [lines, setLines] = useState([{ key: 1, materialId: null, quantity: 0, amount: 0 }])
+  const [lines, setLines] = useState([{ key: 1, materialId: null, quantity: 0, amount: 0, factor: 1 }])
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
 
-  const addLine = () => setLines((p) => [...p, { key: Date.now(), materialId: null, quantity: 0, amount: 0 }])
+  const addLine = () => setLines((p) => [...p, { key: Date.now(), materialId: null, quantity: 0, amount: 0, factor: 1 }])
   const removeLine = (key) => setLines((p) => p.filter((l) => l.key !== key))
   const updateLine = (key, f, v) => setLines((p) => p.map((l) => l.key === key ? { ...l, [f]: v } : l))
   const total = lines.reduce((s, l) => s + Number(l.amount || 0), 0)
+
+  const unitOptions = (materialId) => {
+    const m = materials.find((x) => x.id === materialId)
+    if (!m) return [{ value: 1, label: 'ĐVT' }]
+    const opts = [{ value: 1, label: m.unit }]
+    const f = Number(m.conversionFactor)
+    if (m.purchaseUnit && f > 0 && f !== 1) opts.push({ value: f, label: `${m.purchaseUnit} (×${m.conversionFactor})` })
+    return opts
+  }
+  const baseQty = (l) => Number(l.quantity || 0) * Number(l.factor || 1)
 
   const submit = async () => {
     const v = await form.validateFields()
@@ -28,7 +38,7 @@ function ManualReceipt({ materials, suppliers, onDone }) {
       supplierId: v.supplierId || null,
       note: v.note || null,
       lines: lines.filter((l) => l.materialId && Number(l.quantity) > 0)
-        .map((l) => ({ materialId: l.materialId, quantity: l.quantity, amount: l.amount })),
+        .map((l) => ({ materialId: l.materialId, quantity: baseQty(l), amount: l.amount })),
     }
     if (payload.lines.length === 0) { message.warning('Thêm ít nhất 1 dòng nguyên liệu'); return }
     setSaving(true)
@@ -40,19 +50,26 @@ function ManualReceipt({ materials, suppliers, onDone }) {
   const columns = [
     { title: 'Nguyên vật liệu', dataIndex: 'materialId', render: (v, r) => (
       <Select showSearch optionFilterProp="label" style={{ width: '100%' }} value={v} placeholder="Chọn"
-              onChange={(val) => updateLine(r.key, 'materialId', val)}
+              onChange={(val) => setLines((p) => p.map((l) => l.key === r.key ? { ...l, materialId: val, factor: 1 } : l))}
               options={materials.map((m) => ({ value: m.id, label: `${m.materialName} (${m.unit})` }))} />
     )},
-    { title: 'Số lượng', dataIndex: 'quantity', width: 140, render: (v, r) => (
+    { title: 'Số lượng', dataIndex: 'quantity', width: 110, render: (v, r) => (
       <InputNumber style={{ width: '100%' }} min={0} value={v} onChange={(val) => updateLine(r.key, 'quantity', val)} />
     )},
-    { title: 'Thành tiền (đ)', dataIndex: 'amount', width: 160, render: (v, r) => (
+    { title: 'Đơn vị', dataIndex: 'factor', width: 130, render: (v, r) => (
+      <Select style={{ width: '100%' }} value={v} onChange={(val) => updateLine(r.key, 'factor', val)}
+              options={unitOptions(r.materialId)} />
+    )},
+    { title: 'Thành tiền (đ)', dataIndex: 'amount', width: 150, render: (v, r) => (
       <InputNumber style={{ width: '100%' }} min={0} value={v} onChange={(val) => updateLine(r.key, 'amount', val)}
                    formatter={(x) => `${x}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
                    parser={(x) => `${x}`.replace(/,/g, '')} />
     )},
-    { title: 'Đơn giá (tự tính)', width: 140, align: 'right',
-      render: (_, r) => <span style={{ color: '#1677ff' }}>{Number(r.quantity) > 0 ? fmt(Number(r.amount || 0) / Number(r.quantity)) : '—'}</span> },
+    { title: 'Quy ra ĐVT / Đơn giá', width: 150, align: 'right',
+      render: (_, r) => {
+        const bq = baseQty(r)
+        return <span style={{ color: '#1677ff', fontSize: 12 }}>{bq > 0 ? `${fmt(bq)} → ${fmt(Number(r.amount || 0) / bq)}/đv` : '—'}</span>
+      } },
     { title: '', width: 50, render: (_, r) => <Button size="small" danger icon={<DeleteOutlined />} onClick={() => removeLine(r.key)} /> },
   ]
 
@@ -71,7 +88,7 @@ function ManualReceipt({ materials, suppliers, onDone }) {
       <Table rowKey="key" dataSource={lines} columns={columns} pagination={false} size="small"
              summary={() => (
                <Table.Summary.Row>
-                 <Table.Summary.Cell colSpan={2} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
+                 <Table.Summary.Cell colSpan={3} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
                  <Table.Summary.Cell index={1} align="right"><b style={{ color: '#a0522d' }}>{fmt(total)} đ</b></Table.Summary.Cell>
                  <Table.Summary.Cell colSpan={2} index={2} />
                </Table.Summary.Row>
