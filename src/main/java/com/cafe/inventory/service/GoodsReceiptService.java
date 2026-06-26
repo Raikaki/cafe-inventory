@@ -25,12 +25,14 @@ public class GoodsReceiptService {
     private final InventoryService inventoryService;
     private final VoucherService voucherService;
     private final SupplierRepository supplierRepository;
+    private final PeriodLockService periodLockService;
 
     @Transactional
     public ReceiptResponse create(ReceiptRequest request, String user) {
         if (request.lines() == null || request.lines().isEmpty()) {
             throw new BusinessException("Goods receipt must contain at least one line");
         }
+        periodLockService.checkNotLocked(request.receiptDate());
 
         GoodsReceipt gr = new GoodsReceipt();
         gr.setReceiptNo(nextReceiptNo());

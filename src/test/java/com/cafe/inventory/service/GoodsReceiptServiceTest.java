@@ -32,6 +32,7 @@ class GoodsReceiptServiceTest {
     @Mock InventoryService inventoryService;
     @Mock VoucherService voucherService;
     @Mock SupplierRepository supplierRepository;
+    @Mock PeriodLockService periodLockService;
     @InjectMocks GoodsReceiptService service;
 
     @BeforeEach

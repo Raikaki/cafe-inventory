@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 class VoucherServiceTest {
 
     @Mock VoucherRepository voucherRepository;
+    @Mock PeriodLockService periodLockService;
     @InjectMocks VoucherService service;
 
     @BeforeEach

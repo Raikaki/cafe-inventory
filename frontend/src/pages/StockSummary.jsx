@@ -1,6 +1,6 @@
-import { useState } from 'react'
-import { Card, Table, Typography, DatePicker, Button, Space, Row, message, Tag, Statistic } from 'antd'
-import { CalculatorOutlined, EyeOutlined, DatabaseOutlined } from '@ant-design/icons'
+import { useState, useEffect } from 'react'
+import { Card, Table, Typography, DatePicker, Button, Space, Row, message, Tag, Statistic, Popconfirm } from 'antd'
+import { CalculatorOutlined, EyeOutlined, DatabaseOutlined, LockOutlined, UnlockOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
 import { fmt } from '../utils/format'
@@ -15,6 +15,24 @@ export default function StockSummary() {
   const [loaded, setLoaded] = useState(false)
 
   const params = () => ({ year: month.year(), month: month.month() + 1 })
+
+  const [locks, setLocks] = useState([])
+  const loadLocks = () => client.get('/api/period-locks').then((r) => setLocks(r.data || [])).catch(() => {})
+  useEffect(loadLocks, [])
+  const locked = locks.some((l) => l.periodYear === month.year() && l.periodMonth === month.month() + 1)
+
+  const doLock = () => {
+    const p = params()
+    client.post(`/api/period-locks/lock?year=${p.year}&month=${p.month}`)
+      .then(() => { message.success('Đã khóa sổ kỳ này'); loadLocks() })
+      .catch((e) => message.error(e.response?.data?.message || 'Lỗi'))
+  }
+  const doUnlock = () => {
+    const p = params()
+    client.post(`/api/period-locks/unlock?year=${p.year}&month=${p.month}`)
+      .then(() => { message.success('Đã mở khóa kỳ'); loadLocks() })
+      .catch((e) => message.error(e.response?.data?.message || 'Lỗi'))
+  }
 
   const view = () => {
     setLoading(true)
@@ -69,6 +87,14 @@ export default function StockSummary() {
             <Button type="primary" icon={<CalculatorOutlined />} loading={loading} onClick={aggregate}>
               Tổng hợp &amp; lưu
             </Button>
+            {locked
+              ? <Popconfirm title="Mở khóa kỳ này? Sẽ cho phép sửa lại giao dịch trong kỳ." onConfirm={doUnlock}>
+                  <Button icon={<UnlockOutlined />}>Mở khóa</Button>
+                </Popconfirm>
+              : <Popconfirm title="Khóa sổ kỳ này? Sẽ chặn thêm/sửa giao dịch trong kỳ." onConfirm={doLock}>
+                  <Button danger icon={<LockOutlined />}>Khóa sổ kỳ</Button>
+                </Popconfirm>}
+            {locked && <Tag color="red" icon={<LockOutlined />}>Đã khóa sổ</Tag>}
           </Space>
           {aggregatedAt && <Text type="secondary">Chốt lúc: {dayjs(aggregatedAt).format('DD/MM/YYYY HH:mm')}</Text>}
         </Row>

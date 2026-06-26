@@ -3,7 +3,7 @@ import {
   Card, Table, Typography, DatePicker, Select, Button, Space, Row, Col, message, Tag,
   Modal, Form, Input, InputNumber, Descriptions,
 } from 'antd'
-import { SearchOutlined, PlusOutlined, EyeOutlined, FileTextOutlined } from '@ant-design/icons'
+import { SearchOutlined, PlusOutlined, EyeOutlined, FileTextOutlined, PrinterOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
 import { fmt } from '../utils/format'
@@ -53,6 +53,53 @@ export default function Vouchers() {
       message.success('Đã tạo chứng từ')
       setOpen(false); query()
     } catch (e) { message.error(e.response?.data?.message || 'Lỗi khi lưu') }
+  }
+
+  const printVoucher = (v) => {
+    const formNo = { PHIEU_THU: 'Mẫu số 01 - TT', PHIEU_CHI: 'Mẫu số 02 - TT',
+      PHIEU_NHAP_KHO: 'Mẫu số 01 - VT', PHIEU_XUAT_KHO: 'Mẫu số 02 - VT' }[v.voucherType] || ''
+    const title = (typeMeta[v.voucherType]?.label || 'Chứng từ').toUpperCase()
+    const personLabel = { PHIEU_THU: 'Họ và tên người nộp tiền', PHIEU_CHI: 'Họ và tên người nhận tiền',
+      PHIEU_NHAP_KHO: 'Họ và tên người giao hàng', PHIEU_XUAT_KHO: 'Họ và tên người nhận hàng' }[v.voucherType] || 'Đối tác'
+    const d = dayjs(v.voucherDate)
+    const money = Number(v.amount || 0).toLocaleString('vi-VN')
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${v.voucherNo}</title>
+      <style>
+        body{font-family:'Times New Roman',serif;font-size:14px;color:#000;padding:24px;max-width:720px;margin:auto}
+        .hdr{display:flex;justify-content:space-between;font-size:13px}
+        .ttl{text-align:center;margin:14px 0 2px}.ttl h2{margin:0;font-size:20px;letter-spacing:1px}
+        .meta{text-align:center;font-style:italic;font-size:13px}
+        .no{text-align:center;margin:6px 0 14px}
+        .row{margin:6px 0}.dots{border-bottom:1px dotted #000}
+        .signs{display:flex;justify-content:space-between;margin-top:36px;text-align:center;font-size:13px}
+        .signs div{width:19%}.signs i{font-size:12px}
+        @media print{button{display:none}}
+      </style></head><body>
+      <div class="hdr">
+        <div><b>QUÁN CAFE</b><br/>Địa chỉ: ............................</div>
+        <div style="text-align:right"><i>${formNo}</i><br/><i>(Ban hành theo TT 88/2021/TT-BTC)</i></div>
+      </div>
+      <div class="ttl"><h2>${title}</h2></div>
+      <div class="meta">Ngày ${d.format('DD')} tháng ${d.format('MM')} năm ${d.format('YYYY')}</div>
+      <div class="no">Số: <b>${v.voucherNo}</b></div>
+      <div class="row">${personLabel}: <span class="dots">${v.partnerName || '.....................................'}</span></div>
+      <div class="row">Địa chỉ: <span class="dots">${v.partnerAddress || '.....................................'}</span></div>
+      <div class="row">Nội dung: <span class="dots">${v.content || '.....................................'}</span></div>
+      <div class="row">Số tiền: <b>${money} đ</b></div>
+      <div class="row">Viết bằng chữ: <i>${v.amountInWords || ''}</i></div>
+      <div class="row">Kèm theo: ............ chứng từ gốc.</div>
+      <div class="signs">
+        <div><b>Giám đốc</b><br/><i>(Ký, họ tên)</i></div>
+        <div><b>Kế toán trưởng</b><br/><i>(Ký, họ tên)</i></div>
+        <div><b>Người lập phiếu</b><br/><i>(Ký, họ tên)</i><br/><br/>${v.createdBy || ''}</div>
+        <div><b>Thủ quỹ</b><br/><i>(Ký, họ tên)</i></div>
+        <div><b>Người ${v.voucherType === 'PHIEU_CHI' ? 'nhận' : 'nộp'} tiền</b><br/><i>(Ký, họ tên)</i></div>
+      </div>
+      <button onclick="window.print()" style="margin-top:24px;padding:8px 16px">In</button>
+      </body></html>`
+    const w = window.open('', '_blank')
+    w.document.write(html); w.document.close(); w.focus()
+    setTimeout(() => w.print(), 300)
   }
 
   const columns = [
@@ -131,8 +178,12 @@ export default function Vouchers() {
       </Modal>
 
       {/* Detail */}
-      <Modal title={detail ? `Chứng từ ${detail.voucherNo}` : ''} open={!!detail} footer={null}
-             onCancel={() => setDetail(null)} width={640}>
+      <Modal title={detail ? `Chứng từ ${detail.voucherNo}` : ''} open={!!detail} width={640}
+             onCancel={() => setDetail(null)}
+             footer={detail ? [
+               <Button key="print" type="primary" icon={<PrinterOutlined />} onClick={() => printVoucher(detail)}>In phiếu</Button>,
+               <Button key="close" onClick={() => setDetail(null)}>Đóng</Button>,
+             ] : null}>
         {detail && (
           <Descriptions bordered size="small" column={1}>
             <Descriptions.Item label="Loại"><Tag color={typeMeta[detail.voucherType]?.color}>{typeMeta[detail.voucherType]?.label}</Tag></Descriptions.Item>

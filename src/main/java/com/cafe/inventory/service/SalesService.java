@@ -30,12 +30,14 @@ public class SalesService {
     private final SaleRepository saleRepository;
     private final InventoryService inventoryService;
     private final VoucherService voucherService;
+    private final PeriodLockService periodLockService;
 
     @Transactional
     public SalesResult recordSales(SalesRequest request, String user) {
         if (request.lines() == null || request.lines().isEmpty()) {
             throw new BusinessException("Sales must contain at least one line");
         }
+        periodLockService.checkNotLocked(request.saleDate());
 
         String batchNo = nextBatchNo();
         List<String> warnings = new ArrayList<>();

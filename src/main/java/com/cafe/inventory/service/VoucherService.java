@@ -21,6 +21,7 @@ import java.util.Map;
 public class VoucherService {
 
     private final VoucherRepository voucherRepository;
+    private final PeriodLockService periodLockService;
 
     private static final Map<String, String> PREFIX = Map.of(
             "PHIEU_THU", "PT",
@@ -48,6 +49,7 @@ public class VoucherService {
         if (!PREFIX.containsKey(req.voucherType())) {
             throw new BusinessException("Loại chứng từ không hợp lệ: " + req.voucherType());
         }
+        periodLockService.checkNotLocked(req.voucherDate());
         Voucher v = new Voucher();
         v.setVoucherType(req.voucherType());
         v.setVoucherNo(nextNo(req.voucherType()));

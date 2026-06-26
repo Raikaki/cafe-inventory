@@ -5,7 +5,7 @@ import {
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
   LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
   FileTextOutlined, DatabaseOutlined, QrcodeOutlined, AppstoreOutlined, TeamOutlined, ShopOutlined,
-  SnippetsOutlined, DollarOutlined,
+  SnippetsOutlined, DollarOutlined, AuditOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -25,6 +25,7 @@ const menuItems = [
   { key: 'ops', icon: <SwapOutlined />, label: 'Nghiệp vụ', children: [
     { key: '/goods-receipts', icon: <ImportOutlined />, label: 'Nhập kho' },
     { key: '/sales', icon: <ShoppingCartOutlined />, label: 'Bán hàng' },
+    { key: '/stock-count', icon: <AuditOutlined />, label: 'Kiểm kê' },
   ]},
   { key: 'wh', icon: <DatabaseOutlined />, label: 'Kho & Báo cáo', children: [
     { key: '/inventory', icon: <SwapOutlined />, label: 'Sổ kho' },
@@ -47,13 +48,13 @@ const menuItems = [
 const ROOT_KEYS = ['cat', 'ops', 'wh', 'hr', 'acc']
 const PATH_PARENT = {
   '/materials': 'cat', '/products': 'cat', '/recipes': 'cat', '/suppliers': 'cat',
-  '/goods-receipts': 'ops', '/sales': 'ops',
+  '/goods-receipts': 'ops', '/sales': 'ops', '/stock-count': 'ops',
   '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh', '/product-sales': 'wh', '/price-comparison': 'wh',
   '/attendance': 'hr', '/timesheet': 'hr', '/vouchers': 'acc',
 }
 const TITLES = {
   '/dashboard': 'Dashboard', '/materials': 'Nguyên vật liệu', '/products': 'Sản phẩm',
-  '/recipes': 'Công thức (BOM)', '/suppliers': 'Nhà cung cấp', '/goods-receipts': 'Nhập kho', '/sales': 'Bán hàng',
+  '/recipes': 'Công thức (BOM)', '/suppliers': 'Nhà cung cấp', '/goods-receipts': 'Nhập kho', '/sales': 'Bán hàng', '/stock-count': 'Kiểm kê kho',
   '/inventory': 'Sổ kho', '/inventory-balance': 'Tổng hợp tồn theo kỳ', '/stock-summary': 'Chốt tồn & giá theo tháng',
   '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
   '/timesheet': 'Bảng chấm công', '/product-sales': 'Thành phẩm đã bán',
