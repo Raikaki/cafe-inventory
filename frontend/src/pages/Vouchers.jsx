@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Card, Table, Typography, DatePicker, Select, Button, Space, Row, Col, message, Tag,
   Modal, Form, Input, InputNumber, Descriptions,
@@ -30,6 +30,9 @@ export default function Vouchers() {
   const [open, setOpen] = useState(false)
   const [form] = Form.useForm()
   const [detail, setDetail] = useState(null)
+  const [accounts, setAccounts] = useState([])
+  useEffect(() => { client.get('/api/accounts').then((r) => setAccounts(r.data)) }, [])
+  const accOptions = accounts.map((a) => ({ value: a.accountCode, label: `${a.accountCode} — ${a.accountName}` }))
 
   const query = () => {
     if (!range?.[0] || !range?.[1]) { message.warning('Chọn khoảng ngày'); return }
@@ -81,7 +84,7 @@ export default function Vouchers() {
       </div>
       <div class="ttl"><h2>${title}</h2></div>
       <div class="meta">Ngày ${d.format('DD')} tháng ${d.format('MM')} năm ${d.format('YYYY')}</div>
-      <div class="no">Số: <b>${v.voucherNo}</b></div>
+      <div class="no">Số: <b>${v.voucherNo}</b> &nbsp;&nbsp; Nợ: <b>${v.debitAccount || '...'}</b> &nbsp; Có: <b>${v.creditAccount || '...'}</b></div>
       <div class="row">${personLabel}: <span class="dots">${v.partnerName || '.....................................'}</span></div>
       <div class="row">Địa chỉ: <span class="dots">${v.partnerAddress || '.....................................'}</span></div>
       <div class="row">Nội dung: <span class="dots">${v.content || '.....................................'}</span></div>
@@ -170,6 +173,12 @@ export default function Vouchers() {
                            parser={(x) => `${x}`.replace(/,/g, '')} /></Form.Item></Col>
           </Row>
           <Row gutter={12}>
+            <Col span={12}><Form.Item name="debitAccount" label="Tài khoản Nợ">
+              <Select allowClear showSearch optionFilterProp="label" placeholder="vd. 111 Tiền mặt" options={accOptions} /></Form.Item></Col>
+            <Col span={12}><Form.Item name="creditAccount" label="Tài khoản Có">
+              <Select allowClear showSearch optionFilterProp="label" placeholder="vd. 511 Doanh thu" options={accOptions} /></Form.Item></Col>
+          </Row>
+          <Row gutter={12}>
             <Col span={12}><Form.Item name="approverName" label="Người duyệt"><Input /></Form.Item></Col>
             <Col span={12}><Form.Item name="note" label="Ghi chú"><Input /></Form.Item></Col>
           </Row>
@@ -194,6 +203,7 @@ export default function Vouchers() {
             <Descriptions.Item label="Số lượng / ĐV">{detail.quantity ? `${fmt(detail.quantity)} ${detail.unit || ''}` : '—'}</Descriptions.Item>
             <Descriptions.Item label="Số tiền"><b style={{ color: '#7C3AED' }}>{fmt(detail.amount)} đ</b></Descriptions.Item>
             <Descriptions.Item label="Bằng chữ"><i>{detail.amountInWords}</i></Descriptions.Item>
+            <Descriptions.Item label="Định khoản">Nợ <b>{detail.debitAccount || '—'}</b> / Có <b>{detail.creditAccount || '—'}</b></Descriptions.Item>
             <Descriptions.Item label="Người duyệt">{detail.approverName || '—'}</Descriptions.Item>
             <Descriptions.Item label="Ghi chú">{detail.note || '—'}</Descriptions.Item>
             <Descriptions.Item label="Người tạo">{detail.createdBy}</Descriptions.Item>

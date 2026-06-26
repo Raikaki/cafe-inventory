@@ -21,6 +21,8 @@ public class VoucherDtos {
             @NotNull BigDecimal amount,
             String approverName,
             String note,
-            String attachmentUrl
+            String attachmentUrl,
+            String debitAccount,
+            String creditAccount
     ) {}
 }

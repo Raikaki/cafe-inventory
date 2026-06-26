@@ -40,7 +40,7 @@ class VoucherServiceTest {
     void create_generatesNumberAndAmountInWords() {
         VoucherRequest req = new VoucherRequest("PHIEU_THU", LocalDate.now(),
                 "Quán Cafe", null, "Khách A", null, "Thu tiền bán hàng",
-                null, null, new BigDecimal("1500000"), "Quản lý", null, null);
+                null, null, new BigDecimal("1500000"), "Quản lý", null, null, "111", "511");
 
         Voucher v = service.create(req, "user");
 
@@ -53,7 +53,7 @@ class VoucherServiceTest {
     @Test
     void create_rejectsInvalidType() {
         VoucherRequest req = new VoucherRequest("XYZ", LocalDate.now(),
-                null, null, null, null, null, null, null, new BigDecimal("1000"), null, null, null);
+                null, null, null, null, null, null, null, new BigDecimal("1000"), null, null, null, null, null);
         assertThatThrownBy(() -> service.create(req, "user"))
                 .isInstanceOf(BusinessException.class);
     }

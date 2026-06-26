@@ -19,6 +19,8 @@ import StockSummary from './pages/StockSummary'
 import Timesheet from './pages/Timesheet'
 import ProductSales from './pages/ProductSales'
 import Vouchers from './pages/Vouchers'
+import Accounts from './pages/Accounts'
+import TrialBalance from './pages/TrialBalance'
 import PriceComparison from './pages/PriceComparison'
 import StockCount from './pages/StockCount'
 import Batches from './pages/Batches'
@@ -55,6 +57,8 @@ export default function App() {
         <Route path="/timesheet" element={<Timesheet />} />
         <Route path="/product-sales" element={<ProductSales />} />
         <Route path="/vouchers" element={<Vouchers />} />
+        <Route path="/accounts" element={<Accounts />} />
+        <Route path="/trial-balance" element={<TrialBalance />} />
         <Route path="/price-comparison" element={<PriceComparison />} />
         <Route path="/stock-count" element={<StockCount />} />
         <Route path="/batches" element={<Batches />} />

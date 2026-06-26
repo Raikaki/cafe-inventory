@@ -63,6 +63,8 @@ public class VoucherService {
         v.setUnit(req.unit());
         v.setAmount(req.amount());
         v.setAmountInWords(NumberToWordsVi.toVietnamese(req.amount()));
+        v.setDebitAccount(req.debitAccount());
+        v.setCreditAccount(req.creditAccount());
         v.setApproverName(req.approverName());
         v.setNote(req.note());
         v.setAttachmentUrl(req.attachmentUrl());

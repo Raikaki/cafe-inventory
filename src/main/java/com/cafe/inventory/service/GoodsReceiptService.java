@@ -87,7 +87,7 @@ public class GoodsReceiptService {
             voucherService.create(new VoucherRequest(
                     "PHIEU_NHAP_KHO", gr.getReceiptDate(), null, null, supplierName, null,
                     "Nhập kho NVL - phiếu " + gr.getReceiptNo(), null, null, total,
-                    null, "Tự động sinh từ phiếu nhập " + gr.getReceiptNo(), null), user);
+                    null, "Tự động sinh từ phiếu nhập " + gr.getReceiptNo(), null, "152", "331"), user);
         } catch (Exception ex) {
             log.warn("Auto voucher for receipt {} failed: {}", gr.getReceiptNo(), ex.getMessage());
         }

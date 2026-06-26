@@ -2,8 +2,10 @@ package com.cafe.inventory.controller.api;
 
 import com.cafe.inventory.dto.InventoryBalanceDtos.BalanceReport;
 import com.cafe.inventory.dto.ProductSalesDtos.ProductSalesReport;
+import com.cafe.inventory.dto.TrialBalanceDtos.TrialReport;
 import com.cafe.inventory.service.InventoryBalanceService;
 import com.cafe.inventory.service.ProductSalesService;
+import com.cafe.inventory.service.TrialBalanceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class ReportApiController {
 
     private final InventoryBalanceService inventoryBalanceService;
     private final ProductSalesService productSalesService;
+    private final TrialBalanceService trialBalanceService;
 
     @Operation(summary = "Inventory balance per material over a date range (opening/receipt/consumption/adjustment/closing)")
     @GetMapping("/inventory-balance")
@@ -38,5 +41,13 @@ public class ReportApiController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
         return productSalesService.report(from, to);
+    }
+
+    @Operation(summary = "Trial balance (bảng cân đối số phát sinh) over a date range")
+    @GetMapping("/trial-balance")
+    public TrialReport trialBalance(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        return trialBalanceService.report(from, to);
     }
 }

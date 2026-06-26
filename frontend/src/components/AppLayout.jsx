@@ -5,7 +5,7 @@ import {
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
   LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
   FileTextOutlined, DatabaseOutlined, QrcodeOutlined, AppstoreOutlined, TeamOutlined, ShopOutlined,
-  SnippetsOutlined, DollarOutlined, AuditOutlined, TagsOutlined,
+  SnippetsOutlined, DollarOutlined, AuditOutlined, TagsOutlined, BankOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -43,7 +43,9 @@ const menuItems = [
     { key: '/timesheet', icon: <FileTextOutlined />, label: 'Bảng chấm công' },
   ]},
   { key: 'acc', icon: <SnippetsOutlined />, label: 'Kế toán', children: [
+    { key: '/accounts', icon: <BankOutlined />, label: 'Hệ thống tài khoản' },
     { key: '/vouchers', icon: <FileTextOutlined />, label: 'Chứng từ' },
+    { key: '/trial-balance', icon: <BankOutlined />, label: 'Cân đối phát sinh' },
   ]},
 ]
 
@@ -52,7 +54,8 @@ const PATH_PARENT = {
   '/materials': 'cat', '/products': 'cat', '/recipes': 'cat', '/suppliers': 'cat', '/units': 'cat',
   '/goods-receipts': 'ops', '/sales': 'ops', '/stock-count': 'ops', '/batches': 'ops',
   '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh', '/product-sales': 'wh', '/price-comparison': 'wh',
-  '/attendance': 'hr', '/timesheet': 'hr', '/vouchers': 'acc',
+  '/attendance': 'hr', '/timesheet': 'hr',
+  '/vouchers': 'acc', '/accounts': 'acc', '/trial-balance': 'acc',
 }
 const TITLES = {
   '/dashboard': 'Dashboard', '/materials': 'Nguyên vật liệu', '/products': 'Sản phẩm',
@@ -61,6 +64,7 @@ const TITLES = {
   '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
   '/timesheet': 'Bảng chấm công', '/product-sales': 'Thành phẩm đã bán',
   '/price-comparison': 'So sánh giá nhà cung cấp', '/vouchers': 'Chứng từ kế toán',
+  '/accounts': 'Hệ thống tài khoản kế toán', '/trial-balance': 'Bảng cân đối số phát sinh',
 }
 
 const roleColor = (role) => ({

@@ -54,6 +54,12 @@ public class Voucher extends Auditable {
     @Column(name = "amount_in_words", length = 500)
     private String amountInWords;
 
+    @Column(name = "debit_account", length = 20)
+    private String debitAccount;
+
+    @Column(name = "credit_account", length = 20)
+    private String creditAccount;
+
     @Column(name = "approver_name")
     private String approverName;
 

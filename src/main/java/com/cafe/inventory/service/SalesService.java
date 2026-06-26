@@ -93,7 +93,7 @@ public class SalesService {
             voucherService.create(new VoucherRequest(
                     "PHIEU_THU", request.saleDate(), null, null, null, null,
                     "Doanh thu bán hàng - lô " + batchNo, null, null, revenue,
-                    null, "Tự động sinh từ bán hàng " + batchNo, null), user);
+                    null, "Tự động sinh từ bán hàng " + batchNo, null, "111", "511"), user);
         } catch (Exception ex) {
             log.warn("Auto voucher for sales batch {} failed: {}", batchNo, ex.getMessage());
         }
