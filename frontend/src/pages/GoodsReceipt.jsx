@@ -12,11 +12,11 @@ const { Title, Text } = Typography
 const { Dragger } = Upload
 
 function ManualReceipt({ materials, suppliers, onDone }) {
-  const [lines, setLines] = useState([{ key: 1, materialId: null, quantity: 0, amount: 0, factor: 1 }])
+  const [lines, setLines] = useState([{ key: 1, materialId: null, quantity: 0, amount: 0, factor: 1, batchNo: '', expiryDate: null }])
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
 
-  const addLine = () => setLines((p) => [...p, { key: Date.now(), materialId: null, quantity: 0, amount: 0, factor: 1 }])
+  const addLine = () => setLines((p) => [...p, { key: Date.now(), materialId: null, quantity: 0, amount: 0, factor: 1, batchNo: '', expiryDate: null }])
   const removeLine = (key) => setLines((p) => p.filter((l) => l.key !== key))
   const updateLine = (key, f, v) => setLines((p) => p.map((l) => l.key === key ? { ...l, [f]: v } : l))
   const total = lines.reduce((s, l) => s + Number(l.amount || 0), 0)
@@ -38,7 +38,11 @@ function ManualReceipt({ materials, suppliers, onDone }) {
       supplierId: v.supplierId || null,
       note: v.note || null,
       lines: lines.filter((l) => l.materialId && Number(l.quantity) > 0)
-        .map((l) => ({ materialId: l.materialId, quantity: baseQty(l), amount: l.amount })),
+        .map((l) => ({
+          materialId: l.materialId, quantity: baseQty(l), amount: l.amount,
+          batchNo: l.batchNo || null,
+          expiryDate: l.expiryDate ? l.expiryDate.format('YYYY-MM-DD') : null,
+        })),
     }
     if (payload.lines.length === 0) { message.warning('Thêm ít nhất 1 dòng nguyên liệu'); return }
     setSaving(true)
@@ -70,6 +74,13 @@ function ManualReceipt({ materials, suppliers, onDone }) {
         const bq = baseQty(r)
         return <span style={{ color: '#1677ff', fontSize: 12 }}>{bq > 0 ? `${fmt(bq)} → ${fmt(Number(r.amount || 0) / bq)}/đv` : '—'}</span>
       } },
+    { title: 'Số lô', dataIndex: 'batchNo', width: 120, render: (v, r) => (
+      <Input value={v} placeholder="(tự sinh)" onChange={(e) => updateLine(r.key, 'batchNo', e.target.value)} />
+    )},
+    { title: 'HSD', dataIndex: 'expiryDate', width: 140, render: (v, r) => (
+      <DatePicker style={{ width: '100%' }} value={v} format="DD/MM/YYYY" placeholder="Hạn dùng"
+                  onChange={(val) => updateLine(r.key, 'expiryDate', val)} />
+    )},
     { title: '', width: 50, render: (_, r) => <Button size="small" danger icon={<DeleteOutlined />} onClick={() => removeLine(r.key)} /> },
   ]
 
@@ -85,12 +96,12 @@ function ManualReceipt({ materials, suppliers, onDone }) {
           <Col xs={24} md={10}><Form.Item name="note" label="Ghi chú"><Input /></Form.Item></Col>
         </Row>
       </Form>
-      <Table rowKey="key" dataSource={lines} columns={columns} pagination={false} size="small"
+      <Table rowKey="key" dataSource={lines} columns={columns} pagination={false} size="small" scroll={{ x: 1150 }}
              summary={() => (
                <Table.Summary.Row>
                  <Table.Summary.Cell colSpan={3} index={0}><b>Tổng cộng</b></Table.Summary.Cell>
                  <Table.Summary.Cell index={1} align="right"><b style={{ color: '#a0522d' }}>{fmt(total)} đ</b></Table.Summary.Cell>
-                 <Table.Summary.Cell colSpan={2} index={2} />
+                 <Table.Summary.Cell colSpan={4} index={2} />
                </Table.Summary.Row>
              )} />
       <Space style={{ marginTop: 16 }}>

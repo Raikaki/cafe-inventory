@@ -1,5 +1,6 @@
 package com.cafe.inventory.service;
 
+import com.cafe.inventory.dto.BatchDtos.BatchRequest;
 import com.cafe.inventory.dto.GoodsReceiptDtos.*;
 import com.cafe.inventory.dto.VoucherDtos.VoucherRequest;
 import com.cafe.inventory.entity.GoodsReceipt;
@@ -26,6 +27,7 @@ public class GoodsReceiptService {
     private final VoucherService voucherService;
     private final SupplierRepository supplierRepository;
     private final PeriodLockService periodLockService;
+    private final BatchService batchService;
 
     @Transactional
     public ReceiptResponse create(ReceiptRequest request, String user) {
@@ -60,10 +62,22 @@ public class GoodsReceiptService {
 
         // Apply to inventory: increase qty + record line unit cost on the ledger.
         // Average cost is NOT updated here — it is computed at monthly close.
+        // A batch (lô + HSD) is auto-created when the line has an expiry/batch no.
+        int idx = 1;
         for (ReceiptLine line : request.lines()) {
             BigDecimal unitPrice = line.quantity().compareTo(BigDecimal.ZERO) > 0
                     ? line.amount().divide(line.quantity(), 2, RoundingMode.HALF_UP) : BigDecimal.ZERO;
             inventoryService.receive(line.materialId(), line.quantity(), unitPrice, gr.getReceiptNo(), user);
+
+            boolean wantBatch = line.expiryDate() != null || (line.batchNo() != null && !line.batchNo().isBlank());
+            if (wantBatch) {
+                String bno = (line.batchNo() == null || line.batchNo().isBlank())
+                        ? gr.getReceiptNo() + "/" + idx : line.batchNo();
+                batchService.create(new BatchRequest(line.materialId(), bno, gr.getSupplierId(),
+                        gr.getReceiptDate(), line.expiryDate(), line.quantity(),
+                        "Từ phiếu nhập " + gr.getReceiptNo()), user);
+            }
+            idx++;
         }
 
         // auto-generate a goods-receipt voucher (Phiếu nhập kho)

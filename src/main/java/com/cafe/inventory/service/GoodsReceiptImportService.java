@@ -59,7 +59,7 @@ public class GoodsReceiptImportService {
                 // 3rd column = amount (thành tiền); unit price is derived later
                 BigDecimal amount = r.length > 2 && !r[2].isBlank() ? new BigDecimal(r[2].trim()) : BigDecimal.ZERO;
                 if (qty.compareTo(BigDecimal.ZERO) > 0) {
-                    lines.add(new ReceiptLine(m.getId(), qty, amount));
+                    lines.add(new ReceiptLine(m.getId(), qty, amount, null, null));
                 }
             } catch (NumberFormatException ex) {
                 throw new BusinessException("Invalid number in row for material " + code);

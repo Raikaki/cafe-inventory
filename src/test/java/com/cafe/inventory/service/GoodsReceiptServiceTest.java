@@ -33,6 +33,7 @@ class GoodsReceiptServiceTest {
     @Mock VoucherService voucherService;
     @Mock SupplierRepository supplierRepository;
     @Mock PeriodLockService periodLockService;
+    @Mock BatchService batchService;
     @InjectMocks GoodsReceiptService service;
 
     @BeforeEach
@@ -45,7 +46,7 @@ class GoodsReceiptServiceTest {
     void create_derivesUnitPriceFromAmount_andSumsTotal() {
         // qty 10, amount 1000 -> unit price 100
         ReceiptRequest req = new ReceiptRequest(LocalDate.now(), null, "test",
-                List.of(new ReceiptLine(1L, new BigDecimal("10"), new BigDecimal("1000"))));
+                List.of(new ReceiptLine(1L, new BigDecimal("10"), new BigDecimal("1000"), null, null)));
 
         ReceiptResponse res = service.create(req, "user");
 

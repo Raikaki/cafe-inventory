@@ -8,11 +8,14 @@ import java.util.List;
 
 public class GoodsReceiptDtos {
 
-    /** User enters quantity + amount (thành tiền); unit price = amount / quantity. */
+    /** User enters quantity + amount (thành tiền); unit price = amount / quantity.
+     *  Optional batchNo + expiryDate auto-create a material batch (lô + HSD). */
     public record ReceiptLine(
             @NotNull Long materialId,
             @NotNull BigDecimal quantity,
-            @NotNull BigDecimal amount
+            @NotNull BigDecimal amount,
+            String batchNo,
+            LocalDate expiryDate
     ) {}
 
     public record ReceiptRequest(
