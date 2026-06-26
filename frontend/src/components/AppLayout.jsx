@@ -5,7 +5,7 @@ import {
   ImportOutlined, ShoppingCartOutlined, SwapOutlined, WarningOutlined,
   LogoutOutlined, UserOutlined, MenuFoldOutlined, MenuUnfoldOutlined, ThunderboltOutlined,
   FileTextOutlined, DatabaseOutlined, QrcodeOutlined, AppstoreOutlined, TeamOutlined, ShopOutlined,
-  SnippetsOutlined,
+  SnippetsOutlined, DollarOutlined,
 } from '@ant-design/icons'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -32,6 +32,7 @@ const menuItems = [
     { key: '/stock-summary', icon: <DatabaseOutlined />, label: 'Chốt tồn & giá' },
     { key: '/low-stock', icon: <WarningOutlined />, label: 'Cảnh báo tồn thấp' },
     { key: '/product-sales', icon: <ShoppingCartOutlined />, label: 'Thành phẩm đã bán' },
+    { key: '/price-comparison', icon: <DollarOutlined />, label: 'So sánh giá NCC' },
     { key: '/forecast', icon: <ThunderboltOutlined />, label: 'Dự báo tồn (AI)' },
   ]},
   { key: 'hr', icon: <TeamOutlined />, label: 'Nhân sự', children: [
@@ -47,7 +48,7 @@ const ROOT_KEYS = ['cat', 'ops', 'wh', 'hr', 'acc']
 const PATH_PARENT = {
   '/materials': 'cat', '/products': 'cat', '/recipes': 'cat', '/suppliers': 'cat',
   '/goods-receipts': 'ops', '/sales': 'ops',
-  '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh', '/product-sales': 'wh',
+  '/inventory': 'wh', '/inventory-balance': 'wh', '/stock-summary': 'wh', '/low-stock': 'wh', '/forecast': 'wh', '/product-sales': 'wh', '/price-comparison': 'wh',
   '/attendance': 'hr', '/timesheet': 'hr', '/vouchers': 'acc',
 }
 const TITLES = {
@@ -56,7 +57,7 @@ const TITLES = {
   '/inventory': 'Sổ kho', '/inventory-balance': 'Tổng hợp tồn theo kỳ', '/stock-summary': 'Chốt tồn & giá theo tháng',
   '/low-stock': 'Cảnh báo tồn thấp', '/forecast': 'Dự báo tồn (AI)', '/attendance': 'Chấm công QR',
   '/timesheet': 'Bảng chấm công', '/product-sales': 'Thành phẩm đã bán',
-  '/vouchers': 'Chứng từ kế toán',
+  '/price-comparison': 'So sánh giá nhà cung cấp', '/vouchers': 'Chứng từ kế toán',
 }
 
 const roleColor = (role) => ({

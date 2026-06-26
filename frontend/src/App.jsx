@@ -18,6 +18,7 @@ import StockSummary from './pages/StockSummary'
 import Timesheet from './pages/Timesheet'
 import ProductSales from './pages/ProductSales'
 import Vouchers from './pages/Vouchers'
+import PriceComparison from './pages/PriceComparison'
 import AttendanceAdmin from './pages/AttendanceAdmin'
 import Checkin from './pages/Checkin'
 
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="/timesheet" element={<Timesheet />} />
         <Route path="/product-sales" element={<ProductSales />} />
         <Route path="/vouchers" element={<Vouchers />} />
+        <Route path="/price-comparison" element={<PriceComparison />} />
         <Route path="/forecast" element={<Forecast />} />
         <Route path="/attendance" element={<AttendanceAdmin />} />
       </Route>
