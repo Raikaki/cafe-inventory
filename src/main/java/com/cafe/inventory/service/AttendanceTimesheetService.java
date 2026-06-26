@@ -10,11 +10,13 @@ import com.opencsv.CSVReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
@@ -86,6 +88,79 @@ public class AttendanceTimesheetService {
         rows.sort(Comparator.comparing((TimesheetRow r) -> r.employeeName().toLowerCase())
                 .thenComparing(TimesheetRow::workDate));
         return rows;
+    }
+
+    private static final String[] WD = {"", "T2", "T3", "T4", "T5", "T6", "T7", "CN"};
+    private static final DateTimeFormatter HM = DateTimeFormatter.ofPattern("HH:mm");
+
+    /** Export the timesheet (employee × day matrix) for a date range to .xlsx. */
+    @Transactional(readOnly = true)
+    public byte[] exportExcel(LocalDate from, LocalDate to) {
+        List<com.cafe.inventory.dto.AttendanceDtos.TimesheetRow> rows = getRange(from, to);
+
+        List<LocalDate> days = new ArrayList<>();
+        for (LocalDate d = from; !d.isAfter(to); d = d.plusDays(1)) days.add(d);
+
+        List<String> employees = rows.stream().map(r -> r.employeeName()).distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER).toList();
+        Map<String, com.cafe.inventory.dto.AttendanceDtos.TimesheetRow> byKey = new HashMap<>();
+        for (var r : rows) byKey.put(r.employeeName() + "|" + r.workDate(), r);
+
+        try (XSSFWorkbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = wb.createSheet("ChamCong");
+            CellStyle bold = wb.createCellStyle();
+            Font f = wb.createFont(); f.setBold(true); bold.setFont(f);
+            bold.setAlignment(HorizontalAlignment.CENTER);
+
+            Row h1 = sheet.createRow(0);
+            Row h2 = sheet.createRow(1);
+            cell(h1, 0, "Nhân viên", bold);
+            sheet.addMergedRegion(new CellRangeAddress(0, 1, 0, 0));
+
+            int col = 1;
+            for (LocalDate d : days) {
+                cell(h1, col, d.format(DateTimeFormatter.ofPattern("dd/MM")) + " " + WD[d.getDayOfWeek().getValue()], bold);
+                sheet.addMergedRegion(new CellRangeAddress(0, 0, col, col + 1));
+                cell(h2, col, "Vào", bold);
+                cell(h2, col + 1, "Ra", bold);
+                col += 2;
+            }
+            int totalCol = col;
+            cell(h1, totalCol, "Tổng giờ", bold);
+            sheet.addMergedRegion(new CellRangeAddress(0, 1, totalCol, totalCol));
+
+            int r = 2;
+            for (String name : employees) {
+                Row row = sheet.createRow(r++);
+                row.createCell(0).setCellValue(name);
+                int c = 1;
+                double total = 0;
+                for (LocalDate d : days) {
+                    var rec = byKey.get(name + "|" + d);
+                    if (rec != null) {
+                        if (rec.checkIn() != null) row.createCell(c).setCellValue(rec.checkIn().format(HM));
+                        if (rec.checkOut() != null) row.createCell(c + 1).setCellValue(rec.checkOut().format(HM));
+                        if (rec.checkIn() != null && rec.checkOut() != null) {
+                            long mins = java.time.Duration.between(rec.checkIn(), rec.checkOut()).toMinutes();
+                            if (mins > 0) total += mins / 60.0;
+                        }
+                    }
+                    c += 2;
+                }
+                row.createCell(totalCol).setCellValue(Math.round(total * 10) / 10.0);
+            }
+            sheet.createFreezePane(1, 2);
+            wb.write(out);
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new com.cafe.inventory.exception.BusinessException("Không tạo được file Excel: " + e.getMessage());
+        }
+    }
+
+    private void cell(Row row, int idx, String value, CellStyle style) {
+        Cell c = row.createCell(idx);
+        c.setCellValue(value);
+        if (style != null) c.setCellStyle(style);
     }
 
     @Transactional

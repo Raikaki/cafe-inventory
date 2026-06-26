@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Card, Table, Typography, DatePicker, Button, Space, message, Upload, Alert, Tag } from 'antd'
-import { UploadOutlined, EyeOutlined, CalendarOutlined, DownloadOutlined } from '@ant-design/icons'
+import { UploadOutlined, EyeOutlined, CalendarOutlined, DownloadOutlined, FileExcelOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import client from '../api/client'
 
@@ -41,6 +41,20 @@ export default function Timesheet() {
       message.success(`Đã nhập ${r.data.imported} dòng`); onSuccess(); load()
     } catch (e) { message.error(e.response?.data?.message || 'Lỗi import'); onError(e) }
     finally { setUploading(false) }
+  }
+
+  const exportExcel = () => {
+    if (!range?.[0] || !range?.[1]) { message.warning('Chọn khoảng ngày'); return }
+    const from = range[0].format('YYYY-MM-DD')
+    const to = range[1].format('YYYY-MM-DD')
+    client.get(`/api/attendance/timesheet/export?from=${from}&to=${to}`, { responseType: 'blob' })
+      .then((res) => {
+        const url = URL.createObjectURL(new Blob([res.data]))
+        const a = document.createElement('a')
+        a.href = url; a.download = `cham_cong_${from}_${to}.xlsx`; a.click()
+        URL.revokeObjectURL(url)
+      })
+      .catch(() => message.error('Lỗi xuất Excel'))
   }
 
   const downloadTemplate = () => {
@@ -122,6 +136,7 @@ export default function Timesheet() {
                          { label: '7 ngày qua', value: [dayjs().subtract(6, 'day'), dayjs()] },
                        ]} />
           <Button icon={<EyeOutlined />} onClick={load} loading={loading}>Truy vấn</Button>
+          <Button icon={<FileExcelOutlined />} style={{ color: '#1d6f42', borderColor: '#1d6f42' }} onClick={exportExcel}>Xuất Excel</Button>
           <Button icon={<DownloadOutlined />} onClick={downloadTemplate}>Tải file mẫu</Button>
           <Upload accept=".xlsx,.csv" customRequest={upload} showUploadList={false}>
             <Button type="primary" icon={<UploadOutlined />} loading={uploading}>Upload Excel/CSV</Button>
