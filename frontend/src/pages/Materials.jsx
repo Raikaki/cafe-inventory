@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Card, Table, Button, Modal, Form, Input, InputNumber, Space, Tag, Popconfirm,
-  Typography, message, Row, Col, Tooltip,
+  Typography, message, Row, Col, Tooltip, AutoComplete,
 } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, ReloadOutlined, SlidersOutlined } from '@ant-design/icons'
 import client from '../api/client'
@@ -20,11 +20,15 @@ export default function Materials() {
   const [adjMat, setAdjMat] = useState(null)
   const [adjForm] = Form.useForm()
 
+  const [units, setUnits] = useState([])
   const load = () => {
     setLoading(true)
     client.get('/api/materials').then((res) => setData(res.data)).finally(() => setLoading(false))
   }
-  useEffect(load, [])
+  useEffect(() => {
+    load()
+    client.get('/api/units').then((r) => setUnits(r.data.map((u) => ({ value: u.code }))))
+  }, [])
 
   const openNew = () => { setEditing(null); form.resetFields(); form.setFieldsValue({ currentQty: 0, minimumQty: 0, maximumQty: 0, averageCost: 0 }); setOpen(true) }
   const openEdit = (r) => { setEditing(r); form.setFieldsValue(r); setOpen(true) }
@@ -107,12 +111,15 @@ export default function Materials() {
         <Form form={form} layout="vertical">
           <Row gutter={12}>
             <Col span={12}><Form.Item name="materialCode" label="Mã" rules={[{ required: true }]}><Input /></Form.Item></Col>
-            <Col span={12}><Form.Item name="unit" label="Đơn vị tính" rules={[{ required: true }]}><Input placeholder="g, ml, pcs" /></Form.Item></Col>
+            <Col span={12}><Form.Item name="unit" label="Đơn vị tính (gốc)" rules={[{ required: true }]}>
+              <AutoComplete options={units} placeholder="chọn/gõ: g, ml, cái"
+                            filterOption={(i, o) => o.value.toLowerCase().includes(i.toLowerCase())} /></Form.Item></Col>
           </Row>
           <Form.Item name="materialName" label="Tên" rules={[{ required: true }]}><Input /></Form.Item>
           <Row gutter={12}>
             <Col span={12}><Form.Item name="purchaseUnit" label="Đơn vị mua" extra="vd. mua theo kg/thùng">
-              <Input placeholder="kg, thùng..." /></Form.Item></Col>
+              <AutoComplete options={units} placeholder="chọn/gõ: kg, thùng"
+                            filterOption={(i, o) => o.value.toLowerCase().includes(i.toLowerCase())} /></Form.Item></Col>
             <Col span={12}><Form.Item name="conversionFactor" label="Quy đổi (1 ĐV mua = ? ĐVT)" extra="vd. 1 kg = 1000 g">
               <InputNumber style={{ width: '100%' }} min={0} placeholder="1" /></Form.Item></Col>
           </Row>
